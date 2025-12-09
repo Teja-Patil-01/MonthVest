@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MonthVest - Add Investment</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6fa;
+            color: #333;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background-color: #2575fc;
+            color: #fff;
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 80px);
+        }
+
+        .sidebar {
+            width: 220px;
+            background-color: #6a11cb;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+        }
+
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            padding: 10px;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+
+        .sidebar a:hover {
+            background-color: #2575fc;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .form-container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .form-container h2 {
+            text-align: center;
+            color: #2575fc;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+        }
+
+        .two-col {
+            display: flex;
+            gap: 15px;
+        }
+
+        .two-col .form-group {
+            flex: 1;
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        button {
+            width: 48%;
+            padding: 12px;
+            background-color: #2575fc;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .reset-btn {
+            background-color: #ccc !important;
+            color: black !important;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<header>
+    <h1>MonthVest</h1>
+</header>
+
+<div class="container">
+
+    <div class="sidebar">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="add_investment.html">Add Investment</a>
+        <a href="edit_delete.html">Edit / Delete</a>
+        <a href="portfolio_trends.html">Portfolio Trends</a>
+        <a href="investment_tips.html">Investment Tips</a>
+        <a href="reports.html">Reports</a>
+        <a href="user_profile.html">User Profile</a>
+    </div>
+
+    <div class="main-content">
+        <div class="form-container">
+            <h2>Add New Investment</h2>
+
+            <form onsubmit="return saveInvestment()">
+
+                <div class="form-group">
+                    <label>Investment Type *</label>
+                    <select id="investmentType" required>
+                        <option value="" disabled selected>Select Type</option>
+                        <option value="Stocks">Stocks</option>
+                        <option value="Mutual Funds">Mutual Funds</option>
+                        <option value="Fixed Deposit">Fixed Deposit</option>
+                        <option value="Gold">Gold</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Invested Amount *</label>
+                    <input type="number" id="amount" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Start Date *</label>
+                    <input type="date" id="startDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Current Value *</label>
+                    <input type="number" id="currentValue" required>
+                </div>
+
+                <!-- ⭐ Duration (Years) + Tenure (Months) -->
+                <div class="two-col">
+                    <div class="form-group">
+                        <label>Duration (Years) *</label>
+                        <input type="number" id="durationYears" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tenure (Months) *</label>
+                        <input type="number" id="tenureMonths" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Expected Return Rate (%) *</label>
+                    <input type="number" id="expectedRate" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Notes (Optional)</label>
+                    <textarea id="notes" rows="3"></textarea>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="submit">Save</button>
+                    <button type="reset" class="reset-btn">Reset</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+function saveInvestment() {
+    alert("Investment Saved!");
+    return false;
+}
+</script>
+
+</body>
+</html>

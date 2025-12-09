@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MonthVest - Welcome</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body, html { height: 100%; }
+
+        body {
+            background: #2575fc; /* Blue background */
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        header .auth-buttons a {
+            color: #2575fc;
+            background-color: #fff;
+            text-decoration: none;
+            padding: 10px 20px;
+            margin-left: 15px;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        header .auth-buttons a:hover {
+            background-color: #6a11cb;
+            color: #fff;
+        }
+
+        .landing-body {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 60px;
+        }
+
+        .landing-text {
+            max-width: 600px;
+        }
+
+        .landing-text h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .landing-text p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+        }
+
+        .landing-buttons a {
+            text-decoration: none;
+            padding: 12px 25px;
+            margin-right: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .landing-buttons a.login-btn {
+            background-color: #fff;
+            color: #2575fc;
+        }
+
+        .landing-buttons a.login-btn:hover {
+            background-color: #6a11cb;
+            color: #fff;
+        }
+
+        .landing-buttons a.register-btn {
+            background-color: transparent;
+            color: #fff;
+            border: 2px solid #fff;
+        }
+
+       .landing-buttons a.register-btn:hover {
+             background-color: #0D1B2A;  /* Dark blue background on hover */
+             color: #fff;                /* Text becomes white for contrast */
+}
+
+
+        @media(max-width: 900px) {
+            .landing-body {
+                flex-direction: column;
+                text-align: center;
+                justify-content: center;
+                gap: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>MonthVest</h1>
+        <div class="auth-buttons">
+            <a href="login.html" class="login-btn">Login</a>
+            <a href="sign_up.html" class="sign up-btn">Sign up</a>
+        </div>
+    </header>
+
+    <div class="landing-body">
+        <div class="landing-text">
+            <h2>Track, Analyze & Grow Your Investments Smarter</h2>
+            <p>
+                MonthVest helps you manage your investments efficiently. Add, track, and analyze your portfolio all in one place. 
+                Stay informed with real-time updates and insights to grow your wealth over time.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

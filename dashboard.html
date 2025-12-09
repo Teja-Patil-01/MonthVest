@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MonthVest - Dashboard</title>
+
+<!-- Font Awesome for sidebar icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f6fa;
+        color: #333;
+    }
+    header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 40px;
+        background-color: #2575fc;
+        color: #fff;
+    }
+    header h1 { margin: 0; font-size: 2rem; }
+    header .auth-buttons a {
+        color: #fff; text-decoration: none; margin-left: 20px;
+        font-weight: bold; padding: 8px 16px; border: 2px solid #fff;
+        border-radius: 5px; transition: 0.3s;
+    }
+    header .auth-buttons a:hover { background-color: #fff; color: #2575fc; }
+
+    .container { display: flex; height: calc(100vh - 80px); }
+
+    .sidebar {
+        width: 220px; background-color: #6a11cb; color: #fff;
+        display: flex; flex-direction: column; padding: 30px 20px;
+    }
+    .sidebar a {
+        color: #fff; text-decoration: none; margin-bottom: 20px;
+        font-size: 1.1rem; transition: 0.2s; padding: 10px; border-radius: 6px;
+        display: flex; align-items: center;
+    }
+    .sidebar a:hover { background-color: #2575fc; }
+    .sidebar a i { margin-right: 10px; }
+
+    .main-content { flex: 1; padding: 30px; overflow-y: auto; }
+
+    .cards { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 30px; }
+
+    .card {
+        flex: 1; min-width: 180px; background-color: #fff;
+        border-radius: 10px; padding: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center;
+    }
+    .card h3 { margin: 0; font-size: 1rem; color: #888; }
+    .card p { margin: 10px 0 0; font-size: 1.5rem; font-weight: bold; color: #2575fc; }
+
+    /* Live Stock Prices Section */
+    .stock-prices {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    .stock-card {
+        width: 160px;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        font-weight: 600;
+        color: #fff;
+    }
+    .stock-card.up { background: #28a745; }
+    .stock-card.down { background: #dc3545; }
+    .stock-card div:nth-child(2) {
+        font-size: 22px;
+        margin: 5px 0;
+    }
+
+    .charts { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 30px; }
+
+    .chart-container {
+        flex: 1; min-width: 300px; background-color: #fff; padding: 20px;
+        border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    table {
+        width: 100%; border-collapse: collapse; background-color: #fff;
+        border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    th, td { padding: 12px 15px; text-align: left; }
+    th { background-color: #2575fc; color: #fff; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+
+    .add-btn {
+        margin: 20px 0; padding: 12px 20px; background-color: #2575fc;
+        color: #fff; border: none; border-radius: 8px; font-weight: bold;
+        cursor: pointer; transition: 0.3s;
+    }
+    .add-btn:hover { background-color: #6a11cb; }
+
+    @media(max-width: 768px) {
+        .cards, .charts { flex-direction: column; }
+        .sidebar { width: 100%; flex-direction: row; justify-content: space-around; }
+        .sidebar a { font-size: 0.9rem; }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="add_investment.html"><i class="fas fa-plus-circle"></i> Add Investment</a>
+        <a href="edit_delete.html"><i class="fas fa-edit"></i> Edit / Delete</a>
+        <a href="portfolio_trends.html"><i class="fas fa-chart-line"></i> Portfolio Trends</a>
+        <a href="investment_tips.html"><i class="fas fa-lightbulb"></i> Investment Tips</a>
+        <a href="reports.html"><i class="fas fa-file-alt"></i> Reports</a>
+        <a href="user_profile.html"><i class="fas fa-user-circle"></i> User Profile</a>
+    </div>
+
+    <div class="main-content">
+
+        <!-- Summary Cards -->
+        <div class="cards">
+            <div class="card"><h3>Total Investment</h3><p id="totalInvestment">$0</p></div>
+            <div class="card"><h3>Total Current Value</h3><p id="totalCurrentValue">$0</p></div>
+            <div class="card"><h3>Total Profit/Loss</h3><p id="totalProfitLoss">$0</p></div>
+            <div class="card"><h3>ROI %</h3><p id="roi">0%</p></div>
+        </div>
+
+        <!-- ⭐ Live Stock Price Section Added Here ⭐ -->
+        <div class="card">
+            <h3>Live Stock Prices</h3>
+            <div class="stock-prices">
+                <div class="stock-card up">
+                    <div>TATASTEEL</div>
+                    <div>₹134.5</div>
+                    <div>↑1.2%</div>
+                </div>
+
+                <div class="stock-card up">
+                    <div>RELIANCE</div>
+                    <div>₹2450</div>
+                    <div>↑2.1%</div>
+                </div>
+
+                <div class="stock-card down">
+                    <div>INFY</div>
+                    <div>₹1530</div>
+                    <div>↓0.5%</div>
+                </div>
+            </div>
+        </div>
+        <!-- ⭐ End Stock Section ⭐ -->
+
+        <!-- Charts -->
+        <div class="charts">
+            <div class="chart-container">
+                <h3>Category Distribution</h3>
+                <canvas id="pieChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Monthly Trend</h3>
+                <canvas id="lineChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <button class="add-btn" onclick="window.location.href='add_investment.html'">Add New Investment</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Investment Type</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Current Value</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="transactionTable"></tbody>
+        </table>
+
+    </div>
+</div>
+
+<script>
+    function loadInvestments() {
+        let investments = JSON.parse(localStorage.getItem('investments')) || [];
+        let totalInvest = 0, totalCurrent = 0;
+        let categories = { 'Mutual Funds': 0, 'FD': 0, 'Gold': 0 };
+
+        const tableBody = document.getElementById('transactionTable');
+        tableBody.innerHTML = '';
+
+        investments.forEach(inv => {
+            totalInvest += parseFloat(inv.amount);
+            totalCurrent += parseFloat(inv.currentValue);
+            categories[inv.type] = (categories[inv.type] || 0) + parseFloat(inv.currentValue);
+
+            const status = inv.currentValue >= inv.amount ? 'Profit' : 'Loss';
+            const row = `<tr>
+                <td>${inv.type}</td>
+                <td>$${inv.amount}</td>
+                <td>${inv.date}</td>
+                <td>$${inv.currentValue}</td>
+                <td>${status}</td>
+            </tr>`;
+            tableBody.innerHTML += row;
+        });
+
+        document.getElementById('totalInvestment').innerText = `$${totalInvest}`;
+        document.getElementById('totalCurrentValue').innerText = `$${totalCurrent}`;
+        document.getElementById('totalProfitLoss').innerText = `$${totalCurrent - totalInvest}`;
+        document.getElementById('roi').innerText = totalInvest ? `${(((totalCurrent - totalInvest)/totalInvest)*100).toFixed(2)}%` : '0%';
+
+        // Pie Chart Update
+        pieChart.data.datasets[0].data = [categories['Mutual Funds'], categories['FD'], categories['Gold']];
+        pieChart.update();
+
+        // Line Chart Update
+        const monthlyData = Array(12).fill(0);
+        investments.forEach(inv => {
+            const month = new Date(inv.date).getMonth();
+            monthlyData[month] += parseFloat(inv.currentValue);
+        });
+        lineChart.data.datasets[0].data = monthlyData;
+        lineChart.update();
+    }
+
+    // PIE chart
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    const pieChart = new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Mutual Funds', 'FD', 'Gold'],
+            datasets: [{
+                data: [0,0,0],
+                backgroundColor: ['#2575fc','#6a11cb','#ffdd59'],
+            }]
+        }
+    });
+
+    // LINE chart
+    const lineCtx = document.getElementById('lineChart').getContext('2d');
+    const lineChart = new Chart(lineCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+            datasets: [{
+                label: 'Investment Growth',
+                data: Array(12).fill(0),
+                borderColor: '#2575fc',
+                backgroundColor: 'rgba(37,117,252,0.2)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: { scales: { y: { beginAtZero: true } } }
+    });
+
+    window.onload = loadInvestments;
+</script>
+
+</body>
+</html>

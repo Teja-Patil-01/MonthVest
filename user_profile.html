@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MonthVest - User Profile</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    body { 
+        font-family: Arial, sans-serif; 
+        margin: 0; 
+        background-color: #f5f6fa; 
+        display: flex; 
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: 230px;
+        background: linear-gradient(180deg,#6a11cb,#8f3bd9);
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        padding: 30px 20px;
+        height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 0;
+        transition: 0.3s;
+    }
+    .sidebar a {
+        color: #fff;
+        text-decoration: none;
+        margin-bottom: 18px;
+        font-size: 1.05rem;
+        padding: 10px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        transition: background 0.2s;
+    }
+    .sidebar a:hover {
+        background-color: #7b33d6;
+    }
+    .sidebar a i {
+        margin-right: 10px;
+    }
+
+    /* Main Content */
+    .main {
+        margin-left: 250px;
+        padding: 25px;
+        width: calc(100% - 250px);
+        transition: 0.3s;
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        margin-bottom: 25px;
+        transition: 0.3s;
+    }
+    .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+
+    .avatar-large {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        border: 4px solid #1976d2;
+        margin: auto;
+        display: block;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .avatar-large:hover { transform: scale(1.05); }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+    label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: bold;
+        color: #555;
+    }
+    input, select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: 0.3s;
+    }
+    input:focus, select:focus {
+        border-color: #1976d2;
+        box-shadow: 0 0 5px rgba(25,118,210,0.3);
+        outline: none;
+    }
+
+    .buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    .btn {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .btn-save {
+        background: #28a745;
+        color: white;
+    }
+    .btn-save:hover {
+        background: #218838;
+        transform: translateY(-2px);
+    }
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+    }
+    .btn-cancel:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+
+    .account-info {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #eee;
+    }
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    /* Success Toast */
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4caf50;
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        display: none;
+        animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn {
+        from { transform: translateX(120%); }
+        to { transform: translateX(0); }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .sidebar {
+            transform: translateX(-250px);
+        }
+        .main {
+            width: 100%;
+            margin-left: 0;
+        }
+        .buttons {
+            flex-direction: column;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <a href="add_investment.html"><i class="fas fa-plus-circle"></i> Add Investment</a>
+    <a href="edit_delete.html"><i class="fas fa-edit"></i> Edit / Delete</a>
+    <a href="investment_tips.html"><i class="fas fa-lightbulb"></i> Investment Tips</a>
+    <a href="portfolio_trends.html"><i class="fas fa-chart-line"></i> Portfolio Trends</a>
+    <a href="reports.html"><i class="fas fa-file-alt"></i> Reports</a>
+    <a href="user_profile.html"><i class="fas fa-user-circle"></i> User Profile</a>
+</div>
+
+<!-- Main Content -->
+<main class="main">
+
+    <div class="profile-card">
+        <h2 style="text-align: center; color:#1976d2;">User Profile</h2>
+
+        <img id="profileAvatar" 
+             src="https://via.placeholder.com/100" 
+             class="avatar-large"
+             onclick="document.getElementById('avatarInput').click()">
+
+        <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="previewAvatar()">
+
+        <p style="text-align:center; color:#666;">Click to change avatar</p>
+
+        <form id="profileForm">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="name" value="John Doe">
+            </div>
+
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" value="john@example.com">
+            </div>
+
+            <div class="form-group">
+                <label>Age</label>
+                <input type="number" id="age" value="30" min="18">
+            </div>
+
+            <div class="form-group">
+                <label>Gender</label>
+                <select id="gender">
+                    <option>Male</option>
+                    <option>Female</option>
+                    <option>Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Category</label>
+                <select id="category">
+                    <option>Student</option>
+                    <option selected>Adult</option>
+                    <option>Senior Citizen</option>
+                    <option>Woman</option>
+                </select>
+            </div>
+
+            <div class="buttons">
+                <button type="submit" class="btn btn-save">Save Changes</button>
+                <button type="button" class="btn btn-cancel" onclick="resetForm()">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="account-info">
+        <h3 style="color:#1976d2;">Account Information</h3>
+        <div class="info-item"><span>Member Since</span><span>January 2023</span></div>
+        <div class="info-item"><span>Total Investments</span><span>5</span></div>
+        <div class="info-item"><span>Portfolio Value</span><span>₹5,50,000</span></div>
+        <div class="info-item"><span>Last Login</span><span>Today</span></div>
+    </div>
+
+</main>
+
+<div id="toast" class="toast">Profile updated successfully!</div>
+
+<script>
+function previewAvatar() {
+    const file = document.getElementById('avatarInput').files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = e => document.getElementById('profileAvatar').src = e.target.result;
+        reader.readAsDataURL(file);
+    }
+}
+
+document.getElementById('profileForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const toast = document.getElementById('toast');
+    toast.style.display = "block";
+    setTimeout(() => toast.style.display = "none", 3000);
+});
+
+function resetForm() {
+    document.getElementById('profileForm').reset();
+    document.getElementById('profileAvatar').src = "https://via.placeholder.com/100";
+}
+</script>
+
+</body>
+</html>

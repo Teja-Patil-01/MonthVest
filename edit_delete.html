@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MonthVest - Edit/Delete Investments</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background-color: #f5f6fa;
+        display: flex;
+    }
+    header {
+        background-color: #2575fc;
+        color: #fff;
+        padding: 20px 40px;
+        font-size: 2rem;
+        font-weight: bold;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: 220px; 
+        background-color: #6a11cb; /* violet */
+        color: #fff;
+        display: flex; 
+        flex-direction: column; 
+        padding: 30px 20px;
+        height: 100vh;
+        position: fixed;
+    }
+    .sidebar a {
+        color: #fff; 
+        text-decoration: none; 
+        margin-bottom: 20px;
+        font-size: 1.1rem; 
+        transition: 0.2s; 
+        padding: 10px; 
+        border-radius: 6px;
+        display: flex; 
+        align-items: center;
+    }
+    .sidebar a:hover { background-color: #7b33d6; } /* lighter violet */
+    .sidebar a i { margin-right: 10px; }
+
+    /* Main content */
+    .main-content {
+        margin-left: 240px; /* space for sidebar */
+        padding: 30px;
+        width: calc(100% - 240px);
+    }
+
+    .controls {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    input, select {
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        margin: 5px 0;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    th, td { padding: 12px 15px; text-align: left; }
+    th { background-color: #6a11cb; color: #fff; } /* violet */
+    tr:nth-child(even) { background-color: #f2f2f2; }
+    button {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        color: #fff;
+    }
+    .edit-btn { background-color: #6a11cb; }
+    .edit-btn:hover { background-color: #7b33d6; }
+    .delete-btn { background-color: #ff3f34; }
+    .delete-btn:hover { background-color: #c0392b; }
+
+    @media(max-width: 768px){
+        .sidebar { position: relative; width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; }
+        .main-content { margin-left: 0; width: 100%; }
+    }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <a href="add_investment.html"><i class="fas fa-plus-circle"></i> Add Investment</a>
+    <a href="edit_delete.html"><i class="fas fa-edit"></i> Edit / Delete</a>
+     <a href="portfolio_trends.html"><i class="fas fa-chart-line"></i> Portfolio Trends</a>
+    <a href="investment_tips.html"><i class="fas fa-lightbulb"></i> Investment Tips</a>
+    <a href="reports.html"><i class="fas fa-file-alt"></i> Reports</a>
+    <a href="user_profile.html"><i class="fas fa-user-circle"></i> User Profile</a>
+</div>
+
+<!-- Main content -->
+<div class="main-content">
+    <h2>Edit/Delete Investments</h2>
+    
+    <div class="controls">
+        <input type="text" id="searchBar" placeholder="Search by investment type..." onkeyup="searchTable()">
+        <select id="categoryFilter" onchange="filterCategory()">
+            <option value="">All Categories</option>
+            <option value="Mutual Funds">Mutual Funds</option>
+            <option value="FD">FD</option>
+            <option value="Gold">Gold</option>
+        </select>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Investment Type</th>
+                <th>Amount</th>
+                <th>Current Value</th>
+                <th>Start Date</th>
+                <th>ROI %</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="investmentTable">
+            <!-- Dynamic rows will appear here -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+let investments = JSON.parse(localStorage.getItem('investments')) || [];
+
+// Function to calculate ROI %
+function calculateROI(amount, currentValue) {
+    if(amount == 0) return 0;
+    return ((currentValue - amount)/amount*100).toFixed(2);
+}
+
+// Load table
+function loadTable() {
+    const tableBody = document.getElementById('investmentTable');
+    tableBody.innerHTML = '';
+    investments.forEach((inv, index) => {
+        const roi = calculateROI(inv.amount, inv.currentValue);
+        tableBody.innerHTML += `
+            <tr>
+                <td>${inv.type}</td>
+                <td>$${inv.amount}</td>
+                <td>$${inv.currentValue}</td>
+                <td>${inv.date}</td>
+                <td>${roi}%</td>
+                <td>
+                    <button class="edit-btn" onclick="editInvestment(${index})"><i class="fas fa-edit"></i> Edit</button>
+                    <button class="delete-btn" onclick="deleteInvestment(${index})"><i class="fas fa-trash-alt"></i> Delete</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+// Delete investment
+function deleteInvestment(index) {
+    if(confirm("Are you sure you want to delete this investment?")) {
+        investments.splice(index,1);
+        localStorage.setItem('investments', JSON.stringify(investments));
+        loadTable();
+    }
+}
+
+// Edit investment
+function editInvestment(index) {
+    const inv = investments[index];
+    const newAmount = prompt("Enter new Amount:", inv.amount);
+    const newCurrentValue = prompt("Enter new Current Value:", inv.currentValue);
+    if(newAmount !== null && newCurrentValue !== null){
+        investments[index].amount = parseFloat(newAmount);
+        investments[index].currentValue = parseFloat(newCurrentValue);
+        localStorage.setItem('investments', JSON.stringify(investments));
+        loadTable();
+    }
+}
+
+// Search by investment type
+function searchTable() {
+    const filter = document.getElementById('searchBar').value.toUpperCase();
+    const rows = document.getElementById('investmentTable').getElementsByTagName('tr');
+    for(let i=0;i<rows.length;i++){
+        const cell = rows[i].getElementsByTagName('td')[0];
+        if(cell){
+            rows[i].style.display = cell.innerText.toUpperCase().includes(filter) ? '' : 'none';
+        }
+    }
+}
+
+// Filter by category
+function filterCategory() {
+    const filter = document.getElementById('categoryFilter').value;
+    const rows = document.getElementById('investmentTable').getElementsByTagName('tr');
+    for(let i=0;i<rows.length;i++){
+        const cell = rows[i].getElementsByTagName('td')[0];
+        if(cell){
+            rows[i].style.display = (filter === "" || cell.innerText === filter) ? '' : 'none';
+        }
+    }
+}
+
+// Initial load
+loadTable();
+</script>
+
+</body>
+</html>

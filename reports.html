@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MonthVest - Reports</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    body { font-family: Arial, sans-serif; margin: 0; background-color: #f5f6fa; display: flex; }
+
+    /* Sidebar */
+    .sidebar {
+        width: 220px; background-color: #6a11cb; color: #fff; display: flex; flex-direction: column; padding: 30px 20px; height: 100vh; position: fixed;
+    }
+    .sidebar a { color: #fff; text-decoration: none; margin-bottom: 20px; font-size: 1.1rem; transition: 0.2s; padding: 10px; border-radius: 6px; display: flex; align-items: center; }
+    .sidebar a:hover { background-color: #7b33d6; }
+    .sidebar a i { margin-right: 10px; }
+
+    /* Main content */
+    .main-content { margin-left: 240px; padding: 30px; width: calc(100% - 240px); }
+    h2 { margin-bottom: 20px; }
+
+    button {
+        background-color: #6a11cb; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-right: 10px; margin-bottom: 20px;
+    }
+    button:hover { background-color: #7b33d6; }
+
+    table {
+        width: 100%; border-collapse: collapse; background-color: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 30px;
+    }
+    th, td { padding: 12px 15px; text-align: left; }
+    th { background-color: #6a11cb; color: #fff; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <a href="add_investment.html"><i class="fas fa-plus-circle"></i> Add Investment</a>
+    <a href="edit_delete.html"><i class="fas fa-edit"></i> Edit / Delete</a>
+    <a href="portfolio_trends.html"><i class="fas fa-chart-line"></i> Portfolio Trends</a>
+    <a href="investment_tips.html"><i class="fas fa-lightbulb"></i> Investment Tips</a>
+    <a href="reports.html"><i class="fas fa-file-alt"></i> Reports</a>
+    <a href="user_profile.html"><i class="fas fa-user-circle"></i> User Profile</a>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <h2>Financial Reports</h2>
+
+    <button onclick="downloadCSV()">Download CSV</button>
+    <button onclick="downloadPDF()">Download PDF</button>
+
+    <h3>Total Investments</h3>
+    <p id="totalInvested">$0</p>
+
+    <h3>Category Distribution</h3>
+    <table id="categoryTable">
+        <thead>
+            <tr><th>Category</th><th>Total Amount</th></tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h3>Profit / Loss Summary</h3>
+    <table id="profitTable">
+        <thead>
+            <tr><th>Category</th><th>Profit / Loss ($)</th></tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+// Fetch investment data
+let investments = JSON.parse(localStorage.getItem('investments')) || [];
+
+// Calculate totals
+let totalInvested = investments.reduce((acc, inv) => acc + inv.amount, 0);
+document.getElementById('totalInvested').innerText = `$${totalInvested.toFixed(2)}`;
+
+// Category Distribution
+let categoryMap = {};
+investments.forEach(inv => {
+    categoryMap[inv.type] = (categoryMap[inv.type] || 0) + inv.amount;
+});
+
+let categoryTableBody = document.getElementById('categoryTable').querySelector('tbody');
+for(let cat in categoryMap){
+    let row = `<tr><td>${cat}</td><td>$${categoryMap[cat].toFixed(2)}</td></tr>`;
+    categoryTableBody.innerHTML += row;
+}
+
+// Profit/Loss Summary
+let profitMap = {};
+investments.forEach(inv => {
+    let profit = inv.currentValue - inv.amount;
+    profitMap[inv.type] = (profitMap[inv.type] || 0) + profit;
+});
+
+let profitTableBody = document.getElementById('profitTable').querySelector('tbody');
+for(let cat in profitMap){
+    let row = `<tr><td>${cat}</td><td>$${profitMap[cat].toFixed(2)}</td></tr>`;
+    profitTableBody.innerHTML += row;
+}
+
+// Download CSV
+function downloadCSV() {
+    let csv = "Category,Amount,Current Value,Profit/Loss\n";
+    investments.forEach(inv => {
+        let profit = inv.currentValue - inv.amount;
+        csv += `${inv.type},${inv.amount},${inv.currentValue},${profit}\n`;
+    });
+
+    let blob = new Blob([csv], { type: 'text/csv' });
+    let link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = "investment_report.csv";
+    link.click();
+}
+
+// Download PDF
+function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    let doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("Investment Report", 20, 20);
+
+    let y = 30;
+    doc.setFontSize(12);
+    investments.forEach(inv => {
+        let profit = inv.currentValue - inv.amount;
+        doc.text(`${inv.type} | Invested: $${inv.amount} | Current: $${inv.currentValue} | P/L: $${profit}`, 20, y);
+        y += 10;
+    });
+
+    doc.save("investment_report.pdf");
+}
+</script>
+
+</body>
+</html>
