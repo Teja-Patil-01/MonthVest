@@ -1,105 +1,71 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, render_template, jsonify
 import sqlite3
+from werkzeug.security import generate_password_hash
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
 
-
-# ---------------------- DATABASE CONNECTION ----------------------
+# ---------------------- DATABASE ----------------------
 def get_db():
-    conn = sqlite3.connect("database.db")   # <-- your database name
+    conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     return conn
 
-
-# ---------------------- SIGNUP API ----------------------
-@app.post("/signup")
-def signup():
-    data = request.json
-    email = data["email"]
-    password = data["password"]
-    full_name = data.get("full_name", "")
-
+def create_table():
     conn = get_db()
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute(
-            "INSERT INTO user_login (email, password, full_name) VALUES (?, ?, ?)",
-            (email, password, full_name)
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            fullname TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            category TEXT NOT NULL
         )
-        conn.commit()
-        return jsonify({"message": "Signup successful!"}), 201
-
-    except sqlite3.IntegrityError:
-        return jsonify({"error": "Email already exists!"}), 400
-
-
-# ---------------------- LOGIN API ----------------------
-@app.post("/login")
-def login():
-    data = request.json
-    email = data["email"]
-    password = data["password"]
-
-    conn = get_db()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        "SELECT * FROM user_login WHERE email=? AND password=?",
-        (email, password)
-    )
-    user = cursor.fetchone()
-
-    if user:
-        return jsonify({
-            "message": "Login successful!",
-            "user": {
-                "id": user["id"],
-                "email": user["email"],
-                "full_name": user["full_name"]
-            }
-        })
-
-    return jsonify({"error": "Invalid email or password"}), 401
-
-
-
-# ---------------------- ADD INVESTMENT API ----------------------
-@app.post("/add-investment")
-def add_investment():
-    data = request.json
-
-    # Temporary — replace with logged-in user ID later
-    user_id = 1  
-
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute("""
-        INSERT INTO monthvest 
-        (user_id, investment_type, amount, start_date, current_value, 
-         duration_years, tenure_months, expected_rate, notes)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        user_id,
-        data["investmentType"],
-        data["amount"],
-        data["startDate"],
-        data["currentValue"],
-        data["durationYears"],
-        data["tenureMonths"],
-        data["expectedRate"],
-        data["notes"]
-    ))
-
+    ''')
     conn.commit()
     conn.close()
 
-    return jsonify({"message": "Investment saved successfully!"}), 201
+create_table()
 
+# ---------------------- ROUTES ----------------------
+@app.route("/")
+def index():
+    return render_template("signup.html")
 
-# ---------------------- RUN APP ----------------------
+@app.route("/signup", methods=["POST"])
+def signup():
+    data = request.get_json()
+    fullname = data.get("fullname")
+    email = data.get("email")
+    password = data.get("password")
+    category = data.get("category")
+
+    # Validation
+    if not fullname or not email or not password or not category:
+        return jsonify({"status": "error", "message": "All fields are required!"}), 400
+
+    try:
+        # Hash password
+        hashed_password = generate_password_hash(password)
+
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO users (fullname, email, password, category) VALUES (?, ?, ?, ?)",
+            (fullname, email, hashed_password, category)
+        )
+        conn.commit()
+        conn.close()
+
+        return jsonify({"status": "success", "message": "Signup successful!"})
+
+    except sqlite3.IntegrityError:
+        return jsonify({"status": "error", "message": "Email already exists!"}), 400
+
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"status": "error", "message": "Something went wrong!"}), 500
+
 if __name__ == "__main__":
     app.run(debug=True)

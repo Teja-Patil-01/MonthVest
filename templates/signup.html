@@ -5,26 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MonthVest - Sign Up</title>
 <style>
-    body { 
-        font-family: Arial, sans-serif; 
-        background-color: #f5f6fa; 
-        margin: 0;
-    }
-    header {
-        background-color: #2575fc;
-        color: #fff;
-        padding: 20px 40px;
-        font-size: 2rem;
-        font-weight: bold;
-    }
-    .signup-container { 
-        background-color: #fff; 
-        padding: 40px; 
-        border-radius: 10px; 
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
-        width: 400px; 
-        margin: 50px auto;
-    }
+    body { font-family: Arial, sans-serif; background-color: #f5f6fa; margin: 0; }
+    header { background-color: #2575fc; color: #fff; padding: 20px 40px; font-size: 2rem; font-weight: bold; }
+    .signup-container { background-color: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 400px; margin: 50px auto; }
     h2 { text-align: center; color: #2575fc; margin-bottom: 20px; }
     input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 6px; border: 1px solid #ccc; }
     button { width: 100%; padding: 12px; background-color: #2575fc; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
@@ -53,7 +36,7 @@
         <option value="Women">Women</option>
     </select>
 
-    <button onclick="register()">Sign up</button>
+    <button onclick="register()">Sign Up</button>
     
     <div class="login-link">
         <p>Already have an account? <a href="login.html">Login</a></p>
@@ -61,40 +44,41 @@
 </div>
 
 <script>
-function register() {
+async function register() {
     const fullname = document.getElementById('fullname').value.trim();
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
     const category = document.getElementById('category').value;
 
-    // Basic validation
     if (!fullname || !email || !password || !confirmPassword || !category) {
         alert("Please fill all fields!");
         return;
     }
-    if(password !== confirmPassword) {
+    if (password !== confirmPassword) {
         alert("Passwords do not match!");
         return;
     }
 
-    // Get existing users from localStorage
-    let users = JSON.parse(localStorage.getItem('users')) || [];
+    try {
+        const response = await fetch(fetch("http://127.0.0.1:5000/signup", {
 
-    // Check if email already exists
-    if(users.some(u => u.email === email)) {
-        alert("Email already registered!");
-        return;
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ fullname, email, password, category })
+        }));
+        const result = await response.json();
+
+        if (result.status === "success") {
+            alert(result.message);
+            window.location.href = "login.html";
+        } else {
+            alert(result.message);
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Something went wrong. Please try again.");
     }
-
-    // Add new user
-    users.push({ fullname, email, password, category });
-    localStorage.setItem('users', JSON.stringify(users));
-
-    alert("Registration successful! Redirecting to login page...");
-
-    // Redirect to login page
-    window.location.href = "login.html";
 }
 </script>
 

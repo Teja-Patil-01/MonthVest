@@ -50,25 +50,36 @@
 
 <script>
 async function login() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
 
+    if (!email || !password) {
+        alert("Please enter both email and password!");
+        return;
+    }
+
+    // Send to backend
     const response = await fetch("http://127.0.0.1:5000/login", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
     });
 
     const result = await response.json();
 
-    if(response.ok){
+    if (result.status === "success") {
+        // store logged-in user info
         localStorage.setItem("loggedInUser", JSON.stringify(result.user));
+
+        alert("Login successful! Redirecting...");
         window.location.href = "dashboard.html";
-    } else {
-        alert(result.error);
+    } 
+    else {
+        alert(result.message);
     }
 }
 </script>
+
 
 
 </body>
