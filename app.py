@@ -57,7 +57,6 @@ def index():
 @app.post("/signup")
 def signup():
     data = request.get_json()
-
     fullname = data.get("fullname")
     email = data.get("email")
     password = data.get("password")
@@ -68,18 +67,16 @@ def signup():
 
     try:
         hashed_password = generate_password_hash(password)
-        conn = get_db()
-        conn.execute(
-            "INSERT INTO user (fullname, email, password, category) VALUES (?, ?, ?, ?)",
-            (fullname, email, hashed_password, category)
-        )
-        conn.commit()
-        conn.close()
+        with get_db() as conn:
+            conn.execute(
+                "INSERT INTO user (fullname, email, password, category) VALUES (?, ?, ?, ?)",
+                (fullname, email, hashed_password, category)
+            )
+            conn.commit()
         return jsonify({"status": "success", "message": "Signup successful!"})
 
     except sqlite3.IntegrityError:
         return jsonify({"status": "error", "message": "Email already exists"}), 400
-
     except Exception as e:
         print("Error:", e)
         return jsonify({"status": "error", "message": "Something went wrong"}), 500
