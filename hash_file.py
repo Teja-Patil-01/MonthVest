@@ -1,24 +1,13 @@
 import sqlite3
 from werkzeug.security import generate_password_hash
 
-DB = "database.db"
-conn = sqlite3.connect(DB)
+conn = sqlite3.connect("database.db")
 cur = conn.cursor()
 
-cur.execute("SELECT id, password FROM user")
-rows = cur.fetchall()
-
-count = 0
-for uid, pw in rows:
-    if not pw:
-        continue
-    # naive test for hashed value: Werkzeug hashes start with "pbkdf2:sha256:..."
-    if pw.startswith("pbkdf2:") or pw.startswith("sha"):
-        continue  # already hashed
-    hashed = generate_password_hash(pw)
-    cur.execute("UPDATE user SET password=? WHERE id=?", (hashed, uid))
-    count += 1
+h = generate_password_hash("12345", method="scrypt")
+cur.execute("UPDATE user SET password=?", (h,))
 
 conn.commit()
 conn.close()
-print(f"Hashed {count} passwords.")
+
+print("All users updated. Use password 12345")

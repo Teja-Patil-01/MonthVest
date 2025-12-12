@@ -1,122 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MonthVest - Edit/Delete Investments</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        background-color: #f5f6fa;
-        display: flex;
-    }
-    header {
-        background-color: #2575fc;
-        color: #fff;
-        padding: 20px 40px;
-        font-size: 2rem;
-        font-weight: bold;
-    }
-
-    /* Sidebar */
-    .sidebar {
-        width: 220px; 
-        background-color: #6a11cb; /* violet */
-        color: #fff;
-        display: flex; 
-        flex-direction: column; 
-        padding: 30px 20px;
-        height: 100vh;
-        position: fixed;
-    }
-    .sidebar a {
-        color: #fff; 
-        text-decoration: none; 
-        margin-bottom: 20px;
-        font-size: 1.1rem; 
-        transition: 0.2s; 
-        padding: 10px; 
-        border-radius: 6px;
-        display: flex; 
-        align-items: center;
-    }
-    .sidebar a:hover { background-color: #7b33d6; } /* lighter violet */
-    .sidebar a i { margin-right: 10px; }
-
-    /* Main content */
-    .main-content {
-        margin-left: 240px; /* space for sidebar */
-        padding: 30px;
-        width: calc(100% - 240px);
-    }
-
-    .controls {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 20px;
-        flex-wrap: wrap;
-    }
-    input, select {
-        padding: 10px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        margin: 5px 0;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        background-color: #fff;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    th, td { padding: 12px 15px; text-align: left; }
-    th { background-color: #6a11cb; color: #fff; } /* violet */
-    tr:nth-child(even) { background-color: #f2f2f2; }
-    button {
-        padding: 6px 12px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        color: #fff;
-    }
-    .edit-btn { background-color: #6a11cb; }
-    .edit-btn:hover { background-color: #7b33d6; }
-    .delete-btn { background-color: #ff3f34; }
-    .delete-btn:hover { background-color: #c0392b; }
-
-    @media(max-width: 768px){
-        .sidebar { position: relative; width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; }
-        .main-content { margin-left: 0; width: 100%; }
-    }
+    body { font-family: Arial, sans-serif; margin: 0; background-color: #f5f6fa; display: flex; }
+    .sidebar { width: 220px; background-color: #6a11cb; color: #fff; padding: 30px 20px; height: 100vh; position: fixed; display:flex; flex-direction: column; }
+    .sidebar a { color:#fff; text-decoration:none; margin-bottom:20px; padding:10px; border-radius:6px; display:flex; align-items:center; }
+    .sidebar a i { margin-right:10px; }
+    .main-content { margin-left: 240px; padding: 30px; width: calc(100% - 240px); }
+    .controls { display:flex; gap:10px; margin-bottom:16px; align-items:center; }
+    input, select { padding:8px 10px; border-radius:6px; border:1px solid #ccc; }
+    table { width:100%; border-collapse:collapse; background-color:#fff; border-radius:10px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.06); }
+    th { background-color:#6a11cb; color:#fff; padding:14px; text-align:left; }
+    td { padding:12px; vertical-align:middle; }
+    tr:nth-child(even){ background:#f9f9fb; }
+    .btn { padding:6px 10px; border-radius:6px; border:none; cursor:pointer; color:#fff; }
+    .edit-btn { background:#6a11cb; }
+    .delete-btn { background:#ff3f34; }
+    @media(max-width:768px){ .sidebar{ position:relative; width:100%; height:auto; } .main-content{ margin-left:0; width:100%; } }
 </style>
 </head>
 <body>
 
-<!-- Sidebar -->
 <div class="sidebar">
-    <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-    <a href="add_investment.html"><i class="fas fa-plus-circle"></i> Add Investment</a>
-    <a href="edit_delete.html"><i class="fas fa-edit"></i> Edit / Delete</a>
-     <a href="portfolio_trends.html"><i class="fas fa-chart-line"></i> Portfolio Trends</a>
-    <a href="investment_tips.html"><i class="fas fa-lightbulb"></i> Investment Tips</a>
-    <a href="reports.html"><i class="fas fa-file-alt"></i> Reports</a>
-    <a href="user_profile.html"><i class="fas fa-user-circle"></i> User Profile</a>
+    <a href="{{ url_for('dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <a href="{{ url_for('add_investment_page') }}"><i class="fas fa-plus-circle"></i> Add Investment</a>
+    <a href="{{ url_for('edit_delete_page') }}"><i class="fas fa-edit"></i> Edit / Delete</a>
+    <a href="{{ url_for('portfolio_trends_page') }}"><i class="fas fa-chart-line"></i> Portfolio Trends</a>
+    <a href="{{ url_for('investment_tips_page') }}"><i class="fas fa-lightbulb"></i> Investment Tips</a>
+    <a href="{{ url_for('reports_page') }}"><i class="fas fa-file-alt"></i> Reports</a>
+    <a href="{{ url_for('user_profile_page') }}"><i class="fas fa-user-circle"></i> User Profile</a>
 </div>
 
-<!-- Main content -->
 <div class="main-content">
     <h2>Edit/Delete Investments</h2>
-    
+
     <div class="controls">
-        <input type="text" id="searchBar" placeholder="Search by investment type..." onkeyup="searchTable()">
-        <select id="categoryFilter" onchange="filterCategory()">
-            <option value="">All Categories</option>
-            <option value="Mutual Funds">Mutual Funds</option>
-            <option value="FD">FD</option>
-            <option value="Gold">Gold</option>
+        <input id="searchBar" placeholder="Search by investment type..." oninput="renderTable()" />
+        <select id="categoryFilter" onchange="renderTable()">
+            <option value="">All Types</option>
+            <!-- you can add static categories here or populate dynamically -->
+            <option>Mutual Funds</option>
+            <option>FD</option>
+            <option>Gold</option>
         </select>
     </div>
 
@@ -131,92 +60,134 @@
                 <th>Actions</th>
             </tr>
         </thead>
-        <tbody id="investmentTable">
-            <!-- Dynamic rows will appear here -->
-        </tbody>
+        <tbody id="investmentTable"></tbody>
     </table>
 </div>
 
 <script>
-let investments = JSON.parse(localStorage.getItem('investments')) || [];
+let investments = []; // will hold investments loaded from server
 
-// Function to calculate ROI %
 function calculateROI(amount, currentValue) {
-    if(amount == 0) return 0;
-    return ((currentValue - amount)/amount*100).toFixed(2);
+    amount = parseFloat(amount) || 0;
+    currentValue = parseFloat(currentValue) || 0;
+    if (amount === 0) return "0.00";
+    return (((currentValue - amount) / amount) * 100).toFixed(2);
 }
 
-// Load table
-function loadTable() {
-    const tableBody = document.getElementById('investmentTable');
-    tableBody.innerHTML = '';
-    investments.forEach((inv, index) => {
-        const roi = calculateROI(inv.amount, inv.currentValue);
-        tableBody.innerHTML += `
-            <tr>
-                <td>${inv.type}</td>
-                <td>$${inv.amount}</td>
-                <td>$${inv.currentValue}</td>
-                <td>${inv.date}</td>
+async function loadInvestments() {
+    try {
+        const res = await fetch("/get_investments");
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+            const msg = data.message || "Unable to load investments";
+            alert(msg);
+            return;
+        }
+        investments = data.investments || [];
+        renderTable();
+    } catch (err) {
+        console.error(err);
+        alert("Error loading investments from server.");
+    }
+}
+
+function renderTable() {
+    const tbody = document.getElementById("investmentTable");
+    const search = document.getElementById("searchBar").value.trim().toLowerCase();
+    const filter = document.getElementById("categoryFilter").value.trim();
+
+    tbody.innerHTML = "";
+    investments
+        .filter(inv => {
+            if (search && !inv.investment_type.toLowerCase().includes(search)) return false;
+            if (filter && inv.investment_type !== filter) return false;
+            return true;
+        })
+        .forEach(inv => {
+            const roi = calculateROI(inv.amount, inv.current_value);
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${escapeHtml(inv.investment_type)}</td>
+                <td>$${Number(inv.amount).toFixed(2)}</td>
+                <td>$${Number(inv.current_value).toFixed(2)}</td>
+                <td>${escapeHtml(inv.start_date)}</td>
                 <td>${roi}%</td>
                 <td>
-                    <button class="edit-btn" onclick="editInvestment(${index})"><i class="fas fa-edit"></i> Edit</button>
-                    <button class="delete-btn" onclick="deleteInvestment(${index})"><i class="fas fa-trash-alt"></i> Delete</button>
+                    <button class="btn edit-btn" onclick="onEdit(${inv.id})"><i class="fas fa-edit"></i> Edit</button>
+                    <button class="btn delete-btn" onclick="onDelete(${inv.id})"><i class="fas fa-trash-alt"></i> Delete</button>
                 </td>
-            </tr>
-        `;
-    });
+            `;
+            tbody.appendChild(row);
+        });
 }
 
-// Delete investment
-function deleteInvestment(index) {
-    if(confirm("Are you sure you want to delete this investment?")) {
-        investments.splice(index,1);
-        localStorage.setItem('investments', JSON.stringify(investments));
-        loadTable();
-    }
+function escapeHtml(text = "") {
+    return text
+        .toString()
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
 }
 
-// Edit investment
-function editInvestment(index) {
-    const inv = investments[index];
-    const newAmount = prompt("Enter new Amount:", inv.amount);
-    const newCurrentValue = prompt("Enter new Current Value:", inv.currentValue);
-    if(newAmount !== null && newCurrentValue !== null){
-        investments[index].amount = parseFloat(newAmount);
-        investments[index].currentValue = parseFloat(newCurrentValue);
-        localStorage.setItem('investments', JSON.stringify(investments));
-        loadTable();
-    }
-}
-
-// Search by investment type
-function searchTable() {
-    const filter = document.getElementById('searchBar').value.toUpperCase();
-    const rows = document.getElementById('investmentTable').getElementsByTagName('tr');
-    for(let i=0;i<rows.length;i++){
-        const cell = rows[i].getElementsByTagName('td')[0];
-        if(cell){
-            rows[i].style.display = cell.innerText.toUpperCase().includes(filter) ? '' : 'none';
+async function onDelete(id) {
+    if (!confirm("Are you sure you want to delete this investment?")) return;
+    try {
+        const res = await fetch(`/delete_investment/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+            alert(data.message || "Delete failed");
+            return;
         }
+        // reload after delete
+        await loadInvestments();
+    } catch (err) {
+        console.error(err);
+        alert("Delete error");
     }
 }
 
-// Filter by category
-function filterCategory() {
-    const filter = document.getElementById('categoryFilter').value;
-    const rows = document.getElementById('investmentTable').getElementsByTagName('tr');
-    for(let i=0;i<rows.length;i++){
-        const cell = rows[i].getElementsByTagName('td')[0];
-        if(cell){
-            rows[i].style.display = (filter === "" || cell.innerText === filter) ? '' : 'none';
+async function onEdit(id) {
+    // find the investment locally to show current values
+    const inv = investments.find(i => i.id === id);
+    if (!inv) { alert("Record not found"); return; }
+
+    const newAmount = prompt("Enter new amount:", inv.amount);
+    if (newAmount === null) return; // cancelled
+    const newCurrent = prompt("Enter new current value:", inv.current_value);
+    if (newCurrent === null) return;
+
+    // basic validation
+    if (isNaN(Number(newAmount)) || isNaN(Number(newCurrent))) {
+        alert("Please enter valid numbers.");
+        return;
+    }
+
+    try {
+        const res = await fetch(`/update_investment/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                amount: Number(newAmount),
+                current_value: Number(newCurrent)
+            })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+            alert(data.message || "Update failed");
+            return;
         }
+        // reload list
+        await loadInvestments();
+    } catch (err) {
+        console.error(err);
+        alert("Update error");
     }
 }
 
-// Initial load
-loadTable();
+// initial load
+loadInvestments();
 </script>
-
 </body>
 </html>

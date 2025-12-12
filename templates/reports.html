@@ -55,7 +55,7 @@
     <button onclick="downloadPDF()">Download PDF</button>
 
     <h3>Total Investments</h3>
-    <p id="totalInvested">$0</p>
+    <p id="totalInvested">₹0</p>
 
     <h3>Category Distribution</h3>
     <table id="categoryTable">
@@ -68,7 +68,7 @@
     <h3>Profit / Loss Summary</h3>
     <table id="profitTable">
         <thead>
-            <tr><th>Category</th><th>Profit / Loss ($)</th></tr>
+            <tr><th>Category</th><th>Profit / Loss (₹)</th></tr>
         </thead>
         <tbody></tbody>
     </table>
@@ -76,66 +76,111 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-// Fetch investment data
-let investments = JSON.parse(localStorage.getItem('investments')) || [];
+async function loadReports() {
+    let res = await fetch("/get_investments");
+    let data = await res.json();
 
-// Calculate totals
-let totalInvested = investments.reduce((acc, inv) => acc + inv.amount, 0);
-document.getElementById('totalInvested').innerText = `$${totalInvested.toFixed(2)}`;
+    if (!data.success) {
+        alert("Unable to load reports");
+        return;
+    }
 
-// Category Distribution
-let categoryMap = {};
-investments.forEach(inv => {
-    categoryMap[inv.type] = (categoryMap[inv.type] || 0) + inv.amount;
-});
+    let investments = data.investments;
+    window.investments = investments;
 
-let categoryTableBody = document.getElementById('categoryTable').querySelector('tbody');
-for(let cat in categoryMap){
-    let row = `<tr><td>${cat}</td><td>$${categoryMap[cat].toFixed(2)}</td></tr>`;
-    categoryTableBody.innerHTML += row;
-}
+    // ---------- TOTAL ----------
+    let totalInvested = investments.reduce((acc, inv) => acc + Number(inv.amount), 0);
+    document.getElementById("totalInvested").innerText = `₹${totalInvested.toFixed(2)}`;
 
-// Profit/Loss Summary
-let profitMap = {};
-investments.forEach(inv => {
-    let profit = inv.currentValue - inv.amount;
-    profitMap[inv.type] = (profitMap[inv.type] || 0) + profit;
-});
-
-let profitTableBody = document.getElementById('profitTable').querySelector('tbody');
-for(let cat in profitMap){
-    let row = `<tr><td>${cat}</td><td>$${profitMap[cat].toFixed(2)}</td></tr>`;
-    profitTableBody.innerHTML += row;
-}
-
-// Download CSV
-function downloadCSV() {
-    let csv = "Category,Amount,Current Value,Profit/Loss\n";
+    // ---------- CATEGORY ----------
+    let categoryMap = {};
     investments.forEach(inv => {
-        let profit = inv.currentValue - inv.amount;
-        csv += `${inv.type},${inv.amount},${inv.currentValue},${profit}\n`;
+        categoryMap[inv.investment_type] = 
+            (categoryMap[inv.investment_type] || 0) + Number(inv.amount);
     });
 
-    let blob = new Blob([csv], { type: 'text/csv' });
-    let link = document.createElement('a');
+    let tbody1 = document.querySelector("#categoryTable tbody");
+    tbody1.innerHTML = "";
+    for (let cat in categoryMap) {
+        tbody1.innerHTML += `
+            <tr>
+                <td>${cat}</td>
+                <td>₹${categoryMap[cat].toFixed(2)}</td>
+            </tr>`;
+    }
+
+    // ---------- PROFIT LOSS ----------
+    let profitMap = {};
+    investments.forEach(inv => {
+        let profit = Number(inv.current_value) - Number(inv.amount);
+        profitMap[inv.investment_type] = 
+            (profitMap[inv.investment_type] || 0) + profit;
+    });
+
+    let tbody2 = document.querySelector("#profitTable tbody");
+    tbody2.innerHTML = "";
+    for (let cat in profitMap) {
+        tbody2.innerHTML += `
+            <tr>
+                <td>${cat}</td>
+                <td>₹${profitMap[cat].toFixed(2)}</td>
+            </tr>`;
+    }
+}
+
+loadReports();
+
+
+// ------------------------- DOWNLOAD CSV -------------------------
+function downloadCSV() {
+    let investments = window.investments;
+    if (!investments) return alert("Data not loaded yet");
+
+    let csv = "Category,Amount,Current Value,Profit/Loss\n";
+
+    investments.forEach(inv => {
+        let profit = inv.current_value - inv.amount;
+        csv += `${inv.investment_type},₹${inv.amount},₹${inv.current_value},₹${profit}\n`;
+    });
+
+    let blob = new Blob([csv], { type: "text/csv" });
+    let link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "investment_report.csv";
     link.click();
 }
 
-// Download PDF
+
+// ------------------------- DOWNLOAD PDF -------------------------
 function downloadPDF() {
     const { jsPDF } = window.jspdf;
     let doc = new jsPDF();
-    doc.setFontSize(16);
+
+    doc.setFontSize(18);
     doc.text("Investment Report", 20, 20);
 
-    let y = 30;
+    let y = 35;
     doc.setFontSize(12);
+
+    let investments = window.investments;
+    if (!investments) return alert("Data not loaded yet");
+
     investments.forEach(inv => {
-        let profit = inv.currentValue - inv.amount;
-        doc.text(`${inv.type} | Invested: $${inv.amount} | Current: $${inv.currentValue} | P/L: $${profit}`, 20, y);
+        let profit = inv.current_value - inv.amount;
+
+        doc.text(
+            `${inv.investment_type} | Invested: ₹${inv.amount} | Current: ₹${inv.current_value} | P/L: ₹${profit}`,
+            20,
+            y
+        );
+
         y += 10;
+
+        // Avoid overflow (add new page)
+        if (y > 270) {
+            doc.addPage();
+            y = 20;
+        }
     });
 
     doc.save("investment_report.pdf");
