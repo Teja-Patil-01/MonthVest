@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MonthVest - Welcome</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2575fc, #6a11cb);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 50px;
+            backdrop-filter: blur(6px);
+        }
+
+        header h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        header .auth-buttons a {
+            text-decoration: none;
+            padding: 10px 22px;
+            margin-left: 15px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: 0.3s ease-in-out;
+        }
+
+        .login-btn {
+            background: #fff;
+            color: #2575fc;
+        }
+
+        .login-btn:hover {
+            background: #0d1b2a;
+            color: #fff;
+        }
+
+        .signup-btn {
+            background: transparent;
+            border: 2px solid #fff;
+            color: #fff;
+        }
+
+        .signup-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* BODY CONTENT */
+        .landing-body {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 60px;
+        }
+
+        .landing-box {
+            max-width: 650px;
+            text-align: center;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .landing-box h2 {
+            font-size: 2.3rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .landing-box p {
+            font-size: 1.18rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        /* CTA BUTTONS */
+        .landing-buttons {
+            margin-top: 25px;
+        }
+
+        .landing-buttons a {
+            text-decoration: none;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: 0.3s ease-in-out;
+            margin: 0 10px;
+            display: inline-block;
+        }
+
+        .landing-buttons .login-btn {
+            background: #fff;
+            color: #2575fc;
+        }
+
+        .landing-buttons .login-btn:hover {
+            background: #0d1b2a;
+            color: #fff;
+        }
+
+        .landing-buttons .signup-btn {
+            background: transparent;
+            border: 2px solid #fff;
+            color: #fff;
+        }
+
+        .landing-buttons .signup-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .landing-body {
+                padding: 20px;
+            }
+
+            .landing-box {
+                padding: 25px;
+            }
+
+            .landing-box h2 {
+                font-size: 1.8rem;
+            }
+
+            .landing-box p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>MonthVest</h1>
+        <div class="auth-buttons">
+            <a href="/login" class="login-btn">Login</a>
+            <a href="/signup-page" class="signup-btn">Sign up</a>
+
+        </div>
+    </header>
+
+    <div class="landing-body">
+        <div class="landing-box">
+            <h2>Track, Analyze & Grow Your Investments Smartly</h2>
+            <p>
+                MonthVest helps you manage your investment portfolio with ease.
+                Monitor your assets, analyze your monthly growth, and make wiser decisions
+                using our smart tools and clean dashboards.
+            </p>
+
+            <div class="landing-buttons">
+                <a href="/login" class="login-btn">Get Started</a>
+                 <a href="/signup-page" class="signup-btn">Create Account</a>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

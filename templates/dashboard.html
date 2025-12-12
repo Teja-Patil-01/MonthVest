@@ -113,15 +113,17 @@
 <div class="container">
 
     <!-- Sidebar -->
+    <!-- Sidebar -->
     <div class="sidebar">
-        <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-        <a href="add_investment.html"><i class="fas fa-plus-circle"></i> Add Investment</a>
-        <a href="edit_delete.html"><i class="fas fa-edit"></i> Edit / Delete</a>
-        <a href="portfolio_trends.html"><i class="fas fa-chart-line"></i> Portfolio Trends</a>
-        <a href="investment_tips.html"><i class="fas fa-lightbulb"></i> Investment Tips</a>
-        <a href="reports.html"><i class="fas fa-file-alt"></i> Reports</a>
-        <a href="user_profile.html"><i class="fas fa-user-circle"></i> User Profile</a>
+        <a href="{{ url_for('dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="{{ url_for('add_investment_page') }}"><i class="fas fa-plus-circle"></i> Add Investment</a>
+        <a href="{{ url_for('edit_delete_page') }}"><i class="fas fa-edit"></i> Edit / Delete</a>
+        <a href="{{ url_for('portfolio_trends_page') }}"><i class="fas fa-chart-line"></i> Portfolio Trends</a>
+        <a href="{{ url_for('investment_tips_page') }}"><i class="fas fa-lightbulb"></i> Investment Tips</a>
+        <a href="{{ url_for('reports_page') }}"><i class="fas fa-file-alt"></i> Reports</a>
+        <a href="{{ url_for('user_profile_page') }}"><i class="fas fa-user-circle"></i> User Profile</a>
     </div>
+
 
     <div class="main-content">
 
@@ -171,7 +173,9 @@
         </div>
 
         <!-- Recent Transactions -->
-        <button class="add-btn" onclick="window.location.href='add_investment.html'">Add New Investment</button>
+        <button class="add-btn" onclick="window.location.href='{{ url_for('add_investment_page') }}'">
+            Add New Investment
+        </button>
 
         <table>
             <thead>
@@ -191,7 +195,7 @@
 
 <script>
     function loadInvestments() {
-        let investments = JSON.parse(localStorage.getItem('investments')) || [];
+        let investments = {{ investments | tojson }};
         let totalInvest = 0, totalCurrent = 0;
         let categories = { 'Mutual Funds': 0, 'FD': 0, 'Gold': 0 };
 

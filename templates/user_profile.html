@@ -202,47 +202,54 @@
         <h2 style="text-align: center; color:#1976d2;">User Profile</h2>
 
         <img id="profileAvatar" 
-             src="https://via.placeholder.com/100" 
+             src="{{ url_for('static', filename='uploads/' + user['avatar']) if user['avatar'] else 'https://via.placeholder.com/100' }}"
+ 
              class="avatar-large"
              onclick="document.getElementById('avatarInput').click()">
 
-        <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="previewAvatar()">
+        <input type="file" id="avatarInput" name="avatar" accept="image/*" style="display:none;">
+
 
         <p style="text-align:center; color:#666;">Click to change avatar</p>
 
-        <form id="profileForm">
+        <form id="profileForm" method="POST" enctype="multipart/form-data" action="/user-profile-page">
+
             <div class="form-group">
                 <label>Full Name</label>
-                <input type="text" id="name" value="John Doe">
+                <input type="text" id="name" name="fullname" value="{{ user['fullname'] }}">
+
             </div>
 
             <div class="form-group">
                 <label>Email</label>
-                <input type="email" id="email" value="john@example.com">
+                <input type="email" id="email" value="{{ user['email'] }}" readonly>
+
             </div>
 
             <div class="form-group">
                 <label>Age</label>
-                <input type="number" id="age" value="30" min="18">
+                <input type="number" id="age" name="age" value="{{ user['age'] if user['age'] else '' }}" min="18">
+
             </div>
 
             <div class="form-group">
                 <label>Gender</label>
-                <select id="gender">
-                    <option>Male</option>
-                    <option>Female</option>
-                    <option>Other</option>
+                <select id="gender" name="gender">
+                    <option value="Male"   {% if user['gender']=='Male' %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if user['gender']=='Female' %}selected{% endif %}>Female</option>
+                    <option value="Other"  {% if user['gender']=='Other' %}selected{% endif %}>Other</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label>Category</label>
-                <select id="category">
-                    <option>Student</option>
-                    <option selected>Adult</option>
-                    <option>Senior Citizen</option>
-                    <option>Woman</option>
+                <select id="category" name="category">
+                    <option value="Student" {% if user['category']=='Student' %}selected{% endif %}>Student</option>
+                    <option value="Adult" {% if user['category']=='Adult' %}selected{% endif %}>Adult</option>
+                    <option value="Senior Citizen" {% if user['category']=='Senior Citizen' %}selected{% endif %}>Senior Citizen</option>
+                    <option value="Woman" {% if user['category']=='Woman' %}selected{% endif %}>Woman</option>
                 </select>
+
             </div>
 
             <div class="buttons">
@@ -253,11 +260,9 @@
     </div>
 
     <div class="account-info">
-        <h3 style="color:#1976d2;">Account Information</h3>
-        <div class="info-item"><span>Member Since</span><span>January 2023</span></div>
-        <div class="info-item"><span>Total Investments</span><span>5</span></div>
-        <div class="info-item"><span>Portfolio Value</span><span>₹5,50,000</span></div>
-        <div class="info-item"><span>Last Login</span><span>Today</span></div>
+        <p><strong>Total Investments:</strong> {{ total_investments }}</p>
+        <p><strong>Portfolio Value:</strong> ₹{{ portfolio_value }}</p>
+        <p><strong>Last Login:</strong> Today</p>
     </div>
 
 </main>
