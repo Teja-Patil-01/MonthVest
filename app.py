@@ -111,6 +111,41 @@ def login_page_post():
 
     return redirect(url_for("dashboard"))
 
+
+#@app.route("/get_investments")----------------------------------
+#def get_investments():
+#    if "user_id" not in session:
+#        return jsonify({"success": False, "message": "Not logged in"})
+
+#    try:
+ #       conn = get_db()
+ #       cursor = conn.cursor()
+#
+#        cursor.execute("""
+#            SELECT id, user_id, investment_type, amount, current_value, date
+#            FROM investments
+#            WHERE user_id = ?
+#        """, (session["user_id"],))
+
+#        rows = cursor.fetchall()
+
+#        investments = []
+#        for row in rows:
+#            investments.append({
+#                "id": row[0],
+#                "user_id": row[1],
+#                "investment_type": row[2],
+#                "amount": float(row[3]),
+#                "current_value": float(row[4]),
+#                "date": row[5]
+#            })
+#
+#        return jsonify({"success": True, "investments": investments})
+#
+#    except Exception as e:
+#        return jsonify({"success": False, "message": str(e)})
+
+
 # ---------------------- DASHBOARD ----------------------
 @app.route('/dashboard')
 def dashboard():
@@ -480,53 +515,34 @@ def investment_tips(user_id):
     })
     
     
-@app.route('/api/get_suggestions/<int:user_id>')
-def get_suggestions(user_id):
-    conn = get_db()
-    cur = conn.cursor()
+#@app.route("/get_investments")
+#def get_investments():
+#    if "user_id" not in session:
+#        return jsonify({"success": False, "message": "Not logged in"})
+#
+#    user_id = session["user_id"]
+#
+#    conn = get_db()
+#    cur = conn.cursor()
+#    cur.execute("SELECT * FROM investments WHERE user_id = ?", (user_id,))
+#    investments = [dict(row) for row in cur.fetchall()]
+#    conn.close()
 
-    cur.execute("SELECT * FROM investments WHERE user_id = ?", (user_id,))
-    investments = cur.fetchall()
+ #   return jsonify({"success": True, "investments": investments})
 
-    if not investments:
-        return jsonify({
-            "risk": "Low",
-            "tips": ["No investments found. Start adding your investments to get suggestions."]
-        })
 
-    total = sum([inv["amount"] for inv in investments])
 
-    category = {}
-    for inv in investments:
-        t = inv["investment_type"]
-        category[t] = category.get(t, 0) + inv["amount"]
+    
+#@app.route('/logout')
+#def logout():
+#    session.clear()          # Clears user session
+#    return redirect(url_for('index'))
 
-    high_risk_assets = ["Stocks", "Crypto"]
-    high_risk = sum(inv["amount"] for inv in investments if inv["investment_type"] in high_risk_assets)
-    high_pct = (high_risk / total) * 100
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('dashboard'))
 
-    if high_pct > 60:
-        risk = "High"
-    elif high_pct > 30:
-        risk = "Moderate"
-        tips = []
-    else:
-        risk = "Low"
-
-    tips = []
-    for t, amt in category.items():
-        pct = (amt / total) * 100
-        if pct > 60:
-            tips.append(f"You are over-invested in {t} ({pct:.1f}%). Reduce risk.")
-        if pct < 10:
-            tips.append(f"Your {t} allocation is low ({pct:.1f}%). Add more for diversification.")
-
-    if risk == "High":
-        tips.append("Your portfolio is risky. Add safer assets like FD, debt funds, and gold.")
-    elif risk == "Low":
-        tips.append("Portfolio is low risk. Add equity funds for better long-term growth.")
-
-    return jsonify({"risk": risk, "tips": tips})
 
 
 

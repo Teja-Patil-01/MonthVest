@@ -57,6 +57,8 @@
 </style>
 </head>
 <body>
+    {% include "_navbar.html" %}
+
 
 <!-- Sidebar -->
 <div class="sidebar">
@@ -84,93 +86,33 @@
 </div>
 
 <script>
-// Fetch investment data from localStorage
-let investments = JSON.parse(localStorage.getItem('investments')) || [];
-let suggestionList = document.getElementById('suggestionList');
-let riskBadge = document.getElementById('riskLevel');
+async function loadSuggestions() {
+    const userId = localStorage.getItem("user_id");
 
-// Function to analyze investments
-function generateSuggestions(investments) {
-    let suggestions = [];
-    let risk = "Low";
-
-    // If no investments
-    if(investments.length === 0){
-        suggestions.push("No investments found. Start adding your investments to get suggestions.");
-        return {suggestions, risk: "Low"};
+    if (!userId) {
+        alert("User not logged in");
+        return;
     }
 
-    // Total invested amount
-    let totalInvested = 0;
-    let categoryWise = {}; // {Gold: 1000, Mutual Fund: 5000}
+    const res = await fetch(`/api/get_suggestions/${userId}`);
+    const data = await res.json();
 
-    investments.forEach(inv => {
-        totalInvested += inv.amount;
-        if(!categoryWise[inv.type]) categoryWise[inv.type] = 0;
-        categoryWise[inv.type] += inv.amount;
+    document.getElementById("riskLevel").innerText = data.risk;
+    document.getElementById("riskLevel").classList.add(data.risk.toLowerCase());
+
+    const list = document.getElementById("suggestionList");
+    list.innerHTML = "";
+
+    data.tips.forEach(tip => {
+        let li = document.createElement("li");
+        li.textContent = tip;
+        list.appendChild(li);
     });
-
-    // Suggestions based on category % allocation
-    for(let type in categoryWise){
-        let percent = (categoryWise[type] / totalInvested) * 100;
-
-        if(percent < 10){
-            suggestions.push(`Your allocation in ${type} is too low (${percent.toFixed(1)}%). Consider increasing it.`);
-        }
-        if(percent > 60){
-            suggestions.push(`Your portfolio is too focused on ${type}. Diversify to reduce risk.`);
-        }
-    }
-
-    // Risk level based on investment types
-    let highRiskAssets = ["Stocks", "Crypto"];
-    let highRiskTotal = 0;
-
-    investments.forEach(inv => {
-        if(highRiskAssets.includes(inv.type)){
-            highRiskTotal += inv.amount;
-        }
-    });
-
-    let highRiskPercent = (highRiskTotal / totalInvested) * 100;
-
-    if(highRiskPercent > 60){
-        risk = "High";
-        suggestions.push("Your portfolio is high-risk. Add safer assets like FD, Gold, or Debt Funds.");
-    }
-    else if(highRiskPercent > 30){
-        risk = "Medium";
-        suggestions.push("Your portfolio has moderate risk. Maintain balance by adding stable investments.");
-    }
-    else {
-        risk = "Low";
-        suggestions.push("Your portfolio is low-risk. Add some growth assets for better returns.");
-    }
-
-    if(suggestions.length === 0){
-        suggestions.push("Your portfolio is well balanced. Keep monitoring regularly!");
-    }
-
-    return {suggestions, risk};
 }
 
-
-// Generate and display suggestions
-let result = generateSuggestions(investments);
-
-// Add suggestions to list
-suggestionList.innerHTML = "";
-result.suggestions.forEach(tip => {
-    let li = document.createElement("li");
-    li.textContent = tip;
-    suggestionList.appendChild(li);
-});
-
-// Show risk level
-riskBadge.textContent = result.risk;
-riskBadge.classList.add(result.risk.toLowerCase());
-
+loadSuggestions();
 </script>
+
 
 </body>
 </html>
