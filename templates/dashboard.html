@@ -9,76 +9,75 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-    body { margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f5f6fa; }
-    .container { display:flex; height:100vh; }
+body { margin:0; font-family:'Segoe UI'; background:#f5f6fa; }
+.container { display:flex; min-height:100vh; }
 
-    .sidebar {
-        width:220px;
-        background:#6a11cb;
-        color:#fff;
-        padding:30px 20px;
-        display:flex;
-        flex-direction:column;
-    }
+.sidebar {
+    width:220px;
+    background:#6a11cb;
+    color:#fff;
+    padding:30px 20px;
+    display:flex;
+    flex-direction:column;
+}
+.sidebar a {
+    color:#fff;
+    text-decoration:none;
+    font-size:1.05rem;
+    margin-bottom:16px;
+    padding:10px;
+    border-radius:6px;
+    display:flex;
+    align-items:center;
+}
+.sidebar a:hover { background:#2575fc; }
+.sidebar a i { margin-right:10px; }
 
-    .sidebar a {
-        color:#fff;
-        text-decoration:none;
-        font-size:1.1rem;
-        margin-bottom:20px;
-        padding:10px;
-        border-radius:6px;
-        display:flex;
-        align-items:center;
-    }
+.main-content { flex:1; padding:30px; overflow-y:auto; }
 
-    .sidebar a:hover { background:#2575fc; }
-    .sidebar a i { margin-right:10px; }
+.cards { display:flex; flex-wrap:wrap; gap:20px; margin-bottom:30px; }
+.card {
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    flex:1;
+    min-width:200px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+    text-align:center;
+}
+.card h3 { margin:0; font-size:0.95rem; color:#888; }
+.card p { margin-top:10px; font-size:1.5rem; color:#2575fc; font-weight:bold; }
 
-    .main-content { flex:1; padding:30px; overflow-y:auto; }
+.chart-row { display:flex; gap:20px; margin:30px 0; }
+.chart-box {
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+    flex:1;
+}
 
-    .cards { display:flex; flex-wrap:wrap; gap:20px; margin-bottom:30px; }
-    .card {
-        background:#fff;
-        padding:20px;
-        border-radius:10px;
-        flex:1;
-        min-width:180px;
-        box-shadow:0 4px 12px rgba(0,0,0,0.1);
-        text-align:center;
-    }
+table {
+    width:100%;
+    background:#fff;
+    border-collapse:collapse;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+    border-radius:10px;
+    overflow:hidden;
+}
+th, td  {
+    text-align: center;
+    vertical-align: middle;
+}
+ 
+th { background:#2575fc; color:#fff; }
+tr:nth-child(even) { background:#f2f2f2; }
 
-    .card h3 { margin:0; font-size:1rem; color:#888; }
-    .card p { margin-top:10px; font-size:1.5rem; color:#2575fc; font-weight:bold; }
+.live-price {
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
 
-    .chart-row {
-        display: flex;
-        gap: 20px;
-        margin-top: 30px;
-    }
-
-    .chart-box {
-        background:#fff;
-        padding:20px;
-        border-radius:10px;
-        box-shadow:0 4px 12px rgba(0,0,0,0.1);
-        flex:1;
-    }
-
-    .table-box { margin-top:30px; }
-
-    table {
-        width:100%;
-        background:#fff;
-        border-collapse:collapse;
-        box-shadow:0 4px 12px rgba(0,0,0,0.1);
-        border-radius:8px;
-        overflow:hidden;
-    }
-
-    th, td { padding:12px 15px; text-align:left; }
-    th { background:#2575fc; color:#fff; }
-    tr:nth-child(even) { background:#f2f2f2; }
 </style>
 </head>
 
@@ -86,137 +85,171 @@
 
 <div class="container">
 
-    <!-- SIDEBAR WITH ALL BUTTONS -->
-    <div class="sidebar">
-        <a href="{{ url_for('dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
-        <a href="{{ url_for('add_investment_page') }}"><i class="fas fa-plus-circle"></i> Add Investment</a>
-        <a href="{{ url_for('edit_delete_page') }}"><i class="fas fa-edit"></i> Edit / Delete</a>
-        <a href="{{ url_for('portfolio_trends_page') }}"><i class="fas fa-chart-line"></i> Portfolio Trends</a>
-        <a href="{{ url_for('investment_tips_page') }}"><i class="fas fa-lightbulb"></i> Investment Tips</a>
-        <a href="{{ url_for('reports_page') }}"><i class="fas fa-file-alt"></i> Reports</a>
-        <a href="{{ url_for('user_profile_page') }}"><i class="fas fa-user"></i> User Profile</a>
-        <a href="{{ url_for('logout') }}">
-        <i class="fas fa-sign-out-alt"></i> Logout
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <a href="{{ url_for('dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="{{ url_for('add_investment_page') }}"><i class="fas fa-plus"></i> Add Investment</a>
+
+    <a href="{{ url_for('add_stock_page') }}">
+    <i class="fas fa-chart-line"></i> Add Stock
 </a>
 
+    <a href="{{ url_for('edit_delete_page') }}"><i class="fas fa-edit"></i> Edit / Delete</a>
+    <a href="{{ url_for('portfolio_trends_page') }}"><i class="fas fa-chart-line"></i> Portfolio Trends</a>
+   
+    <a href="{{ url_for('investment_tips_page') }}"><i class="fas fa-lightbulb"></i> Investment Tips</a>
+    <a href="{{ url_for('reports_page') }}"><i class="fas fa-file-alt"></i> Reports</a>
+
+    <a href="{{ url_for('user_profile_page') }}"><i class="fas fa-user"></i> User Profile</a>
+    <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
     
+
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+<h2>Welcome, {{ session['fullname'] }}</h2>
+
+<div class="cards">
+    <div class="card"><h3>Total Investment</h3><p>₹{{ totalInvestment }}</p></div>
+    <div class="card"><h3>Current Value</h3><p>₹{{ totalCurrentValue }}</p></div>
+    <div class="card"><h3>Total Profit / Loss</h3><p>₹{{ totalProfitLoss }}</p></div>
+    <div class="card"><h3>ROI</h3><p>{{ roi }}%</p></div>
+</div>
+
+
+
+<div class="chart-row">
+    <div class="chart-box">
+        <h3>Investment Distribution</h3>
+        <canvas id="pieChart"></canvas>
     </div>
-
-    <!-- MAIN CONTENT -->
-    <div class="main-content">
-
-        <h2>Welcome, {{ session['fullname'] }}</h2>
-
-        <!-- SUMMARY CARDS -->
-        <div class="cards">
-            <div class="card">
-                <h3>Total Investment</h3>
-                <p>₹{{ totalInvestment }}</p>
-            </div>
-            <div class="card">
-                <h3>Current Value</h3>
-                <p>₹{{ totalCurrentValue }}</p>
-            </div>
-            <div class="card">
-                <h3>Total Profit / Loss</h3>
-                <p>₹{{ totalProfitLoss }}</p>
-            </div>
-            <div class="card">
-                <h3>ROI</h3>
-                <p>{{ roi }}%</p>
-            </div>
-        </div>
-
-        <!-- TWO CHARTS SIDE BY SIDE -->
-        <div class="chart-row">
-            <div class="chart-box">
-                <h3>Investment Type Distribution</h3>
-                <canvas id="pieChart"></canvas>
-            </div>
-
-            <div class="chart-box">
-                <h3>Portfolio Growth Over Time</h3>
-                <canvas id="lineChart"></canvas>
-            </div>
-        </div>
-
-        <!-- TABLE -->
-        <div class="table-box">
-            <h3>Your Investments</h3>
-            <table>
-                <tr>
-                    <th>Type</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                    <th>Current Value</th>
-                </tr>
-
-                {% for inv in investments %}
-                <tr>
-                    <td>{{ inv.type }}</td>
-                    <td>{{ inv.amount }}</td>
-                    <td>{{ inv.date }}</td>
-                    <td>{{ inv.currentValue }}</td>
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
-
+    <div class="chart-box">
+        <h3>Portfolio Growth</h3>
+        <canvas id="lineChart"></canvas>
     </div>
 </div>
 
+</div>
+</div>
+
+<h3 style="margin-top:40px;">Your Live Stocks</h3>
+
+<table>
+<thead>
+<tr>
+    <th>Company</th>
+    <th>Buy Price</th>
+    <th>Live Price</th>
+    <th>Quantity</th>
+    <th>Result</th>
+</tr>
+</thead>
+<tbody>
+{% for stock in live_stocks %}
+<tr>
+    <td>{{ stock.symbol}}</td>
+    <td>₹{{ stock.buy_price }}</td>
+    <td class="live-price" data-symbol="{{ stock.symbol }}">
+    ₹{{ stock.live_price }}
+</td>
+
+    <td>{{ stock.quantity }}</td>
+    <td>
+    {% if stock.result >= 0 %}
+        🟢 ₹{{ stock.result }} profit
+    {% else %}
+        🔴 ₹{{ stock.result | abs }} loss
+    {% endif %}
+</td>
+
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+<h3>Your Investments</h3>
+<table>
+<thead>
+<tr>
+    <th>Type</th>
+    <th>Amount</th>
+    <th>Current Value</th>
+    <th>Date</th>
+</tr>
+</thead>
+<tbody>
+{% for inv in investments %}
+<tr>
+    <td>{{ inv.type }}</td>
+    <td>₹{{ inv.amount }}</td>
+    <td>₹{{ inv.currentValue }}</td>
+    <td>{{ inv.date }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+
 <script>
-    const investments = {{ investments | tojson }};
+const investments = {{ investments | tojson }};
 
-    /* -------- PIE CHART -------- */
-    let typeTotals = {};
+// ---------- PIE CHART ----------
+const pieCtx = document.getElementById('pieChart');
+let typeTotals = {};
 
-    investments.forEach(inv => {
-        let t = inv.type.trim().toLowerCase();
+investments.forEach(inv => {
+    typeTotals[inv.type] = (typeTotals[inv.type] || 0) + parseFloat(inv.amount);
+});
 
-        if (t.includes("mutual")) t = "Mutual Funds";
-        else if (t.includes("fixed") || t === "fd") t = "FD";
-        else if (t.includes("gold")) t = "Gold";
-        else t = inv.type;
+new Chart(pieCtx, {
+    type: 'pie',
+    data: {
+        labels: Object.keys(typeTotals),
+        datasets: [{
+            data: Object.values(typeTotals)
+        }]
+    }
+});
 
-        if (!typeTotals[t]) typeTotals[t] = 0;
-        typeTotals[t] += parseFloat(inv.currentValue);
-    });
+// ---------- LINE CHART ----------
+const lineCtx = document.getElementById('lineChart');
+let dateMap = {};
 
-    new Chart(document.getElementById('pieChart'), {
-        type: 'pie',
-        data: {
-            labels: Object.keys(typeTotals),
-            datasets: [{
-                data: Object.values(typeTotals),
-                borderWidth: 1
-            }]
+investments.forEach(inv => {
+    dateMap[inv.date] = (dateMap[inv.date] || 0) + parseFloat(inv.amount);
+});
+
+new Chart(lineCtx, {
+    type: 'line',
+    data: {
+        labels: Object.keys(dateMap),
+        datasets: [{
+            label: "Portfolio Growth",
+            data: Object.values(dateMap),
+            tension: 0.4
+        }]
+    }
+});
+
+
+setInterval(() => {
+    document.querySelectorAll("[data-symbol]").forEach(async el => {
+        const symbol = el.dataset.symbol;
+
+        try {
+            const res = await fetch(`/live-stock/${symbol}`);
+            const data = await res.json();
+
+            if (data.price !== "N/A") {
+                el.innerText = "₹" + parseFloat(data.price).toFixed(3);
+            }
+        } catch (err) {
+            console.error("Live price fetch error:", err);
         }
     });
-
-    /* -------- LINE CHART -------- */
-    let dateMap = {};
-
-    investments.forEach(inv => {
-        if (!dateMap[inv.date]) dateMap[inv.date] = 0;
-        dateMap[inv.date] += parseFloat(inv.currentValue);
-    });
-
-    const sortedDates = Object.keys(dateMap).sort();
-    const sortedValues = sortedDates.map(d => dateMap[d]);
-
-    new Chart(document.getElementById('lineChart'), {
-        type: 'line',
-        data: {
-            labels: sortedDates,
-            datasets: [{
-                label: "Total Portfolio Value",
-                data: sortedValues,
-                borderWidth: 2,
-                tension: 0.4
-            }]
-        }
-    });
+}, 10000);
 </script>
 
 </body>

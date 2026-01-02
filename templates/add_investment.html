@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MonthVest - Add Investment</title>
+    <!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
 
     <style>
         body {
@@ -127,15 +130,45 @@
 
 <div class="container">
 
+    <!-- SIDEBAR -->
     <div class="sidebar">
-        <a href="dashboard.html">Dashboard</a>
-        <a href="add_investment.html">Add Investment</a>
-        <a href="edit_delete.html">Edit / Delete</a>
-        <a href="portfolio_trends.html">Portfolio Trends</a>
-        <a href="investment_tips.html">Investment Tips</a>
-        <a href="reports.html">Reports</a>
-        <a href="user_profile.html">User Profile</a>
+        <a href="{{ url_for('dashboard') }}">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+
+        <a href="{{ url_for('add_investment_page') }}" class="active">
+            <i class="fas fa-plus"></i> Add Investment
+        </a>
+
+        <a href="{{ url_for('add_stock_page') }}">
+            <i class="fas fa-chart-line"></i> Add Stock
+        </a>
+
+        <a href="{{ url_for('edit_delete_page') }}">
+            <i class="fas fa-edit"></i> Edit / Delete
+        </a>
+
+        <a href="{{ url_for('portfolio_trends_page') }}">
+            <i class="fas fa-chart-line"></i> Portfolio Trends
+        </a>
+
+        <a href="{{ url_for('investment_tips_page') }}">
+            <i class="fas fa-lightbulb"></i> Investment Tips
+        </a>
+
+        <a href="{{ url_for('reports_page') }}">
+            <i class="fas fa-file-alt"></i> Reports
+        </a>
+
+        <a href="{{ url_for('user_profile_page') }}">
+            <i class="fas fa-user"></i> User Profile
+        </a>
+
+        <a href="{{ url_for('logout') }}" class="logout">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
     </div>
+
 
     <div class="main-content">
         <div class="form-container">
@@ -183,8 +216,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Expected Return Rate (%) *</label>
-                    <input type="number" id="expectedRate" required>
+                    <label>Expected Return Rate (CAGR %) *</label>
+                    <input type="number" id="expectedRate" readonly >
                 </div>
 
                 <div class="form-group">
@@ -224,10 +257,35 @@ async function saveInvestment() {
     });
 
     const result = await response.json();
-
     alert(result.message);
     return false;
 }
+
+function calculateExpectedReturn() {
+    const amount = parseFloat(document.getElementById("amount").value);
+    const currentValue = parseFloat(document.getElementById("currentValue").value);
+    const years = parseFloat(document.getElementById("durationYears").value) || 0;
+    const months = parseFloat(document.getElementById("tenureMonths").value) || 0;
+    const totalYears = years + (months / 12);
+    
+    if (isNaN(amount) || amount <= 0 || 
+    isNaN(currentValue)|| currentValue <= 0 ||
+        totalYears <= 0 ) {
+        document.getElementById("expectedRate").value = "";
+        return;
+    }
+
+    // ✅ CAGR Formula
+    const cagr = (Math.pow(currentValue / amount, 1 / totalYears) - 1) * 100;
+    document.getElementById("expectedRate").value = cagr.toFixed(2);
+}
+
+// 🔥 Auto-calculate on input change
+document.addEventListener("DOMContentLoaded", function () {
+    ["amount", "currentValue", "durationYears", "tenureMonths"].forEach(id => {
+        document.getElementById(id).addEventListener("input", calculateExpectedReturn);
+    });
+});
 </script>
 
 

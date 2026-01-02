@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Stock | MonthVest</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+    <style>
+        /* ---------- GLOBAL ---------- */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #f4f6f9;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ---------- SIDEBAR ---------- */
+        .sidebar {
+            width: 220px;
+            background:#6a11cb ;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            color: #fff;
+        }
+
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+            transition: background 0.2s ease;
+        }
+
+        .sidebar a i {
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        .sidebar a:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .sidebar a.active {
+            background: #2575fc;
+            font-weight: 600;
+        }
+
+        .sidebar a.logout {
+            margin-top: auto;
+            background: rgba(255,255,255,0.15);
+        }
+
+        /* ---------- MAIN CONTENT ---------- */
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        /* ---------- CARD ---------- */
+        .card {
+            background: #ffffff;
+            width: 380px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: #4f46e5;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: #4338ca;
+        }
+
+        /* ---------- RESPONSIVE ---------- */
+        @media (max-width: 768px) {
+            .layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .sidebar a {
+                flex: 1 1 50%;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <a href="{{ url_for('dashboard') }}">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+
+        <a href="{{ url_for('add_investment_page') }}">
+            <i class="fas fa-plus"></i> Add Investment
+        </a>
+
+        <a href="{{ url_for('add_stock_page') }}"
+           class="{% if request.endpoint=='add_stock_page' %}active{% endif %}">
+            <i class="fas fa-chart-line"></i> Add Stock
+        </a>
+
+        <a href="{{ url_for('edit_delete_page') }}">
+            <i class="fas fa-edit"></i> Edit / Delete
+        </a>
+
+        <a href="{{ url_for('portfolio_trends_page') }}">
+            <i class="fas fa-chart-line"></i> Portfolio Trends
+        </a>
+
+        <a href="{{ url_for('investment_tips_page') }}">
+            <i class="fas fa-lightbulb"></i> Investment Tips
+        </a>
+
+        <a href="{{ url_for('reports_page') }}">
+            <i class="fas fa-file-alt"></i> Reports
+        </a>
+
+        <a href="{{ url_for('user_profile_page') }}">
+            <i class="fas fa-user"></i> User Profile
+        </a>
+
+        <a href="{{ url_for('logout') }}" class="logout">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+        <div class="card">
+            <h2 class="page-title">Add Stock</h2>
+
+            <form id="stockForm">
+                <div class="form-group">
+                    <label>Stock Symbol</label>
+                    <input type="text" name="symbol" placeholder="e.g. TCS.NS" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <input type="number" name="quantity" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Buy Price (₹)</label>
+                    <input type="number" step="0.01" name="buy_price" required>
+                </div>
+
+                <button type="submit" class="btn-primary">Add Stock</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script>
+document.getElementById("stockForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    const res = await fetch("/add-stock", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await res.json();
+    alert(data.message);
+
+    if (data.success) this.reset();
+});
+</script>
+
+</body>
+</html>

@@ -4,115 +4,159 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MonthVest - Investment Suggestions</title>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-    body { font-family: Arial, sans-serif; margin: 0; background-color: #f5f6fa; display: flex; }
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f5f6fa;
+    
+}
 
-    /* Sidebar */
-    .sidebar {
-        width: 220px; background-color: #6a11cb; color: #fff; 
-        display: flex; flex-direction: column; 
-        padding: 30px 20px; height: 100vh; 
-        position: fixed;
-    }
-    .sidebar a {
-        color: #fff; text-decoration: none; 
-        margin-bottom: 20px; font-size: 1.1rem; 
-        transition: 0.2s; padding: 10px; 
-        border-radius: 6px; display: flex; 
-        align-items: center;
-    }
-    .sidebar a:hover { background-color: #7b33d6; }
-    .sidebar a i { margin-right: 10px; }
+/* Sidebar */
+.sidebar {
+    width: 220px;
+    background-color: #6a11cb;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px;
+    height: 100vh;
+    position: fixed;
+}
 
-    /* Main content */
-    .main-content { 
-        margin-left: 240px; 
-        padding: 30px; 
-        width: calc(100% - 240px); 
-    }
-    h2 { margin-bottom: 20px; }
+.sidebar a {
+    color: #fff;
+    text-decoration: none;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    transition: 0.2s;
+    padding: 10px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+}
 
-    .suggestion-box {
-        background-color: #fff; 
-        padding: 20px; 
-        border-radius: 10px; 
-        margin-bottom: 20px; 
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
+.sidebar a:hover {
+    background-color: #7b33d6;
+}
 
-    .risk-badge {
-        padding: 6px 15px; 
-        border-radius: 6px; 
-        color: #fff; 
-        font-weight: bold; 
-        display: inline-block;
-        font-size: 14px;
-    }
-    .low { background-color: #28a745; }
-    .medium { background-color: #fd7e14; }
-    .high { background-color: #dc3545; }
+.sidebar a i {
+    margin-right: 10px;
+}
 
-    ul li { margin-bottom: 10px; }
+/* Main content */
+.main-content {
+    margin-left: 240px;
+    padding: 30px;
+    width: calc(100% - 240px);
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+.suggestion-box {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.risk-badge {
+    padding: 6px 15px;
+    border-radius: 6px;
+    color: #fff;
+    font-weight: bold;
+    display: inline-block;
+    font-size: 14px;
+}
+
+.low { background-color: #28a745; }
+.medium { background-color: #fd7e14; }
+.high { background-color: #dc3545; }
+
+ul li {
+    margin-bottom: 10px;
+}
 </style>
 </head>
+
 <body>
-    {% include "_navbar.html" %}
 
+{% include "_navbar.html" %}
 
-<!-- Sidebar -->
+<!-- SIDEBAR -->
 <div class="sidebar">
-    <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-    <a href="add_investment.html"><i class="fas fa-plus-circle"></i> Add Investment</a>
-    <a href="edit_delete.html"><i class="fas fa-edit"></i> Edit / Delete</a>
-    <a href="portfolio_trends.html"><i class="fas fa-chart-line"></i> Portfolio Trends</a>
-    <a href="investment_tips.html"><i class="fas fa-lightbulb"></i> Investment Tips</a>
-    <a href="reports.html"><i class="fas fa-file-alt"></i> Reports</a>
-    <a href="user_profile.html"><i class="fas fa-user-circle"></i> User Profile</a>
+    <a href="{{ url_for('dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="{{ url_for('add_investment_page') }}"><i class="fas fa-plus"></i> Add Investment</a>
+    <a href="{{ url_for('add_stock_page') }}"><i class="fas fa-chart-line"></i> Add Stock</a>
+    <a href="{{ url_for('edit_delete_page') }}"><i class="fas fa-edit"></i> Edit / Delete</a>
+    <a href="{{ url_for('portfolio_trends_page') }}"><i class="fas fa-chart-line"></i> Portfolio Trends</a>
+    <a href="{{ url_for('investment_tips_page') }}" class="active"><i class="fas fa-lightbulb"></i> Investment Tips</a>
+    <a href="{{ url_for('reports_page') }}"><i class="fas fa-file-alt"></i> Reports</a>
+    <a href="{{ url_for('user_profile_page') }}"><i class="fas fa-user"></i> User Profile</a>
+    <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
 </div>
 
-<!-- Main Content -->
+<!-- MAIN CONTENT -->
 <div class="main-content">
     <h2>Investment Suggestions</h2>
 
-    <div class="suggestion-box" id="dynamic-suggestions">
+    <div class="suggestion-box">
         <h3>Personalized Suggestions Based on Your Portfolio</h3>
         <ul id="suggestionList"></ul>
-        <p style="margin-top: 15px;">
-            Portfolio Risk Level: 
+
+        <p style="margin-top:15px;">
+            Portfolio Risk Level:
             <span id="riskLevel" class="risk-badge">-</span>
         </p>
+    </div>
+
+    <!-- RISK CHART -->
+    <div class="suggestion-box">
+        <h3>Portfolio Risk Distribution</h3>
+        <canvas id="riskChart" height="120"></canvas>
     </div>
 </div>
 
 <script>
+let riskChart = null;
+
 async function loadSuggestions() {
-    const userId = localStorage.getItem("user_id");
+    const userId = "{{ user_id }}";
 
     if (!userId) {
-        alert("User not logged in");
+        console.error("User not logged in");
         return;
     }
 
     const res = await fetch(`/api/get_suggestions/${userId}`);
     const data = await res.json();
 
-    document.getElementById("riskLevel").innerText = data.risk;
-    document.getElementById("riskLevel").classList.add(data.risk.toLowerCase());
+    const riskBadge = document.getElementById("riskLevel");
+    riskBadge.innerText = data.risk;
+    riskBadge.className = "risk-badge";
+    riskBadge.classList.add(data.risk.toLowerCase());
 
     const list = document.getElementById("suggestionList");
     list.innerHTML = "";
 
     data.tips.forEach(tip => {
-        let li = document.createElement("li");
+        const li = document.createElement("li");
         li.textContent = tip;
         list.appendChild(li);
     });
+
+    renderRiskChart(data.risk_percentages);
 }
 
 loadSuggestions();
 </script>
-
 
 </body>
 </html>

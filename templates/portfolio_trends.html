@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Portfolio Trends - MonthVest</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -22,14 +23,45 @@ canvas { background: white; padding: 10px; border-radius: 10px; margin-top: 30px
     {% include "_navbar.html" %}
 
 
-<div class="sidebar">
-    <a href="/dashboard">Dashboard</a>
-    <a href="/add-investment-page">Add Investment</a>
-    <a href="/edit_delete">Edit/Delete</a>
-    <a href="/portfolio_trends">Portfolio Trends</a>
-    <a href="/investment_tips">Investment Tips</a>
-    <a href="/reports">Reports</a>
-</div>
+ <!-- SIDEBAR -->
+    <div class="sidebar">
+        <a href="{{ url_for('dashboard') }}">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+
+        <a href="{{ url_for('add_investment_page') }}" class="active">
+            <i class="fas fa-plus"></i> Add Investment
+        </a>
+
+        <a href="{{ url_for('add_stock_page') }}">
+            <i class="fas fa-chart-line"></i> Add Stock
+        </a>
+
+        <a href="{{ url_for('edit_delete_page') }}">
+            <i class="fas fa-edit"></i> Edit / Delete
+        </a>
+
+        <a href="{{ url_for('portfolio_trends_page') }}">
+            <i class="fas fa-chart-line"></i> Portfolio Trends
+        </a>
+
+        <a href="{{ url_for('investment_tips_page') }}">
+            <i class="fas fa-lightbulb"></i> Investment Tips
+        </a>
+
+        <a href="{{ url_for('reports_page') }}">
+            <i class="fas fa-file-alt"></i> Reports
+        </a>
+
+        <a href="{{ url_for('user_profile_page') }}">
+            <i class="fas fa-user"></i> User Profile
+        </a>
+
+        <a href="{{ url_for('logout') }}" class="logout">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+
 
 <div class="main-content">
 
@@ -64,57 +96,125 @@ canvas { background: white; padding: 10px; border-radius: 10px; margin-top: 30px
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    const user = "{{ fullname }}";
-
-    fetch(`/api/investments/${user}`)
-        .then(res => res.json())
-        .then(data => {
-
-            if (data.length === 0) return;
-
-            let totalInvested = data.reduce((a, b) => a + b.amount, 0);
-            let totalReturns = data.reduce((a, b) => a + b.profit, 0);
-
-            document.getElementById("totalInvested").innerText = totalInvested;
-            document.getElementById("totalReturns").innerText = totalReturns;
-
-            let best = data.reduce((a, b) => a.profit > b.profit ? a : b);
-            let worst = data.reduce((a, b) => a.profit < b.profit ? a : b);
-
-            document.getElementById("bestCat").innerText = `${best.type} (${best.profit})`;
-            document.getElementById("worstCat").innerText = `${worst.type} (${worst.profit})`;
-
-            loadBarChart(data);
-            loadLineChart(data);
-        });
+    loadTotalInvestment();
+    loadTotalReturns();
+    loadBestWorst();
+    loadCharts();
 });
 
-function loadBarChart(data) {
+/* ---------- TOTAL INVESTED (SAME AS REPORTS) ---------- */
+async function loadTotalInvestment() {
+    const res = await fetch("/api/total-investment", {
+        credentials: "same-origin"
+    });
+    const data = await res.json();
+
+    document.getElementById("totalInvested").innerText =
+        data.success ? `₹${Number(data.totalInvestment).toFixed(2)}` : "₹0";
+}
+
+/* ---------- TOTAL RETURNS (STOCKS + INVESTMENTS) ---------- */
+async function loadTotalReturns() {
+    let totalProfit = 0;
+
+    const invRes = await fetch("/get_investments", { credentials: "same-origin" });
+    const invData = await invRes.json();
+    if (invData.success) {
+        invData.investments.forEach(i => {
+            totalProfit += Number(i.current_value) - Number(i.amount);
+        });
+    }
+
+    const stockRes = await fetch("/get_stock_reports", { credentials: "same-origin" });
+    const stockData = await stockRes.json();
+    if (stockData.success) {
+        stockData.stocks.forEach(s => {
+            totalProfit += Number(s.profit);
+        });
+    }
+
+    document.getElementById("totalReturns").innerText =
+        `₹${totalProfit.toFixed(2)}`;
+}
+
+/* ---------- BEST & WORST PERFORMING ---------- */
+async function loadBestWorst() {
+    let all = [];
+
+    const inv = await fetch("/get_investments", { credentials: "same-origin" });
+    const invData = await inv.json();
+    if (invData.success) {
+        invData.investments.forEach(i => {
+            all.push({
+                type: i.investment_type,
+                profit: Number(i.current_value) - Number(i.amount)
+            });
+        });
+    }
+
+    const stocks = await fetch("/get_stock_reports", { credentials: "same-origin" });
+    const stockData = await stocks.json();
+    if (stockData.success) {
+        stockData.stocks.forEach(s => {
+            all.push({
+                type: s.symbol,
+                profit: Number(s.profit)
+            });
+        });
+    }
+
+    if (all.length === 0) return;
+
+    const best = all.reduce((a, b) => a.profit > b.profit ? a : b);
+    const worst = all.reduce((a, b) => a.profit < b.profit ? a : b);
+
+    document.getElementById("bestCat").innerText =
+        `${best.type} (₹${best.profit.toFixed(2)})`;
+
+    document.getElementById("worstCat").innerText =
+        `${worst.type} (₹${worst.profit.toFixed(2)})`;
+}
+
+/* ---------- CHARTS ---------- */
+async function loadCharts() {
+    let labels = [];
+    let profits = [];
+    let amounts = [];
+
+    const inv = await fetch("/get_investments", { credentials: "same-origin" });
+    const invData = await inv.json();
+    if (invData.success) {
+        invData.investments.forEach(i => {
+            labels.push(i.investment_type);
+            profits.push(Number(i.current_value) - Number(i.amount));
+            amounts.push(Number(i.amount));
+        });
+    }
+
     new Chart(document.getElementById("barChart"), {
         type: "bar",
         data: {
-            labels: data.map(i => i.type),
+            labels,
             datasets: [{
-                label: "Profit/Loss",
-                data: data.map(i => i.profit)
+                label: "Profit / Loss",
+                data: profits
             }]
         }
     });
-}
 
-function loadLineChart(data) {
     new Chart(document.getElementById("lineChart"), {
         type: "line",
         data: {
-            labels: data.map(i => i.type),
+            labels,
             datasets: [{
                 label: "Investment Amount",
-                data: data.map(i => i.amount)
+                data: amounts
             }]
         }
     });
 }
 </script>
+
 
 </body>
 </html>

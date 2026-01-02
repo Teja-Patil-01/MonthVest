@@ -4,6 +4,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os, time, csv
+import yfinance as yf
+from flask import jsonify
+from live_price import get_live_price
+
+
+
 
 app = Flask(__name__)
 CORS(app)
@@ -78,20 +84,33 @@ def edit_delete_page():
 
 
 
-@app.route('/investment_tips')
+@app.route("/investment_tips")
 def investment_tips_page():
-    return render_template('investment_tips.html')
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    return render_template(
+        "investment_tips.html",
+        user_id=session["user_id"]
+    )
 
 @app.route('/reports')
 def reports_page():
+    if "user_id" not in session:
+        return redirect(url_for("login_page_get"))
     return render_template('reports.html')
 
 
 
 
+
 # ---------------------- LOGIN ----------------------
-@app.route("/login", methods=["POST"])
-def login_page_post():
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        return render_template("login.html")
+
+    # POST
     email = request.form.get("email")
     password = request.form.get("password")
 
@@ -103,6 +122,7 @@ def login_page_post():
 
     if not user:
         return "Email not found"
+
     if not check_password_hash(user["password"], password):
         return "Wrong password"
 
@@ -110,7 +130,6 @@ def login_page_post():
     session["fullname"] = user["fullname"]
 
     return redirect(url_for("dashboard"))
-
 
 #@app.route("/get_investments")----------------------------------
 #def get_investments():
@@ -147,45 +166,133 @@ def login_page_post():
 
 
 # ---------------------- DASHBOARD ----------------------
-@app.route('/dashboard')
+
+from flask import Flask, render_template, session
+# ... other imports like sqlite3 or your get_live_price function
+
+@app.route("/dashboard")
 def dashboard():
-    if 'user_id' not in session:
-     return redirect(url_for('login_page_get'))
+    if "user_id" not in session:
+        return redirect(url_for("login_page_get"))
 
-    user_id = session['user_id']
-
+    user_id = session["user_id"]
     conn = get_db()
     cur = conn.cursor()
+
+    # ===================== STOCKS =====================
     cur.execute("""
-        SELECT investment_type, amount, start_date, current_value
+        SELECT symbol, quantity, buy_price
+        FROM stocks
+        WHERE user_id = ?
+    """, (user_id,))
+    stock_rows = cur.fetchall()
+
+    live_stocks = []
+
+    stock_investment = 0
+    stock_current_value = 0
+
+    for r in stock_rows:
+        symbol = r["symbol"]
+        qty = r["quantity"]
+        buy_price = r["buy_price"]
+
+        live_price = round(get_live_price(symbol), 3)
+        invested = buy_price * qty
+        current_val = live_price * qty
+        result = current_val - invested
+
+        live_stocks.append({
+            "symbol": symbol,
+            "buy_price": buy_price,
+            "live_price": live_price,
+            "quantity": qty,
+            "result": round(result, 2)
+        })
+
+        stock_investment += invested
+        stock_current_value += current_val
+
+    stock_profit_loss = stock_current_value - stock_investment
+
+    # ===================== OTHER INVESTMENTS =====================
+    cur.execute("""
+        SELECT investment_type, amount, current_value, start_date
         FROM investments
         WHERE user_id = ?
     """, (user_id,))
-    investments = cur.fetchall()
+    inv_rows = cur.fetchall()
     conn.close()
 
-    investments_list = []
-    for inv in investments:
-        investments_list.append({
-            'type': inv['investment_type'],
-            'amount': inv['amount'],
-            'date': inv['start_date'],
-            'currentValue': inv['current_value']
+    investments = []
+    investment_amount_total = 0
+    investment_current_total = 0
+
+    for i in inv_rows:
+        investments.append({
+            "type": i["investment_type"],
+            "amount": i["amount"],
+            "currentValue": i["current_value"],
+            "date": i["start_date"]
         })
 
-    total_investment = sum(float(inv['amount']) for inv in investments_list)
-    total_current = sum(float(inv['currentValue']) for inv in investments_list)
-    total_profit_loss = total_current - total_investment
-    roi = (total_profit_loss / total_investment * 100) if total_investment else 0
+        investment_amount_total += i["amount"]
+        investment_current_total += i["current_value"]
+
+    # ===================== GRAND TOTAL =====================
+    total_investment = stock_investment + investment_amount_total
+    total_current_value = stock_current_value + investment_current_total
+    total_profit_loss = total_current_value - total_investment
+
+    roi = round(
+        (total_profit_loss / total_investment) * 100, 2
+    ) if total_investment > 0 else 0
 
     return render_template(
         "dashboard.html",
-        investments=investments_list,
-        totalInvestment=total_investment,
-        totalCurrentValue=total_current,
-        totalProfitLoss=total_profit_loss,
-        roi=round(roi, 2)
+        live_stocks=live_stocks,
+        investments=investments,
+        totalInvestment=round(total_investment, 2),
+        totalCurrentValue=round(total_current_value, 2),
+        totalProfitLoss=round(total_profit_loss, 2),
+        roi=roi
     )
+
+
+# 🔴 LIVE STOCK API
+#@app.route('/live-stock/<symbol>')
+#def live_stock(symbol):
+ #   try:
+#        stock = yf.Ticker(symbol + ".NS")  # ✅ FIX
+#        data = stock.history(period="1d")##
+
+#        if data.empty:
+#            return jsonify({"price": "N/A"})
+
+#        price = round(float(data['Close'].iloc[-1]), 2)
+#        return jsonify({"price": price})
+#    except Exception as e:
+#        print("Live stock API error:", e)
+#        return jsonify({"price": "N/A"})
+
+@app.route('/live-stock/<symbol>')
+def live_stock(symbol):
+    price = get_live_price(symbol)
+    return jsonify({
+        "price": round(price, 3) if price else "N/A"
+    })
+
+
+import yfinance as yf
+
+def get_live_price(symbol):
+    try:
+        stock = yf.Ticker(symbol.upper() + ".NS")  # NSE stocks
+        price = stock.info.get("regularMarketPrice")
+        return float(price) if price else 0
+    except Exception as e:
+        print("Live price error:", e)
+        return 0
 
 # ---------------------- ADD INVESTMENT ----------------------
 @app.route("/add-investment-page")
@@ -231,7 +338,7 @@ def edit_investment_page(id):
     cur = conn.cursor()
     cur.execute("""
         SELECT id, investment_type, amount, current_value, start_date,
-               duration_years, tenure_months, expected_return_rate, notes
+               duration_years, tenure_months, expected_rate, notes
         FROM investments
         WHERE id = ? AND user_id = ?
     """, (id, session["user_id"]))
@@ -353,10 +460,12 @@ def user_profile_page():
     conn = get_db()
     cur = conn.cursor()
 
+    # -------- UPDATE PROFILE --------
     if request.method == "POST":
         fullname = request.form.get("fullname")
         category = request.form.get("category")
         avatar_filename = None
+
         file = request.files.get("avatar")
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
@@ -365,19 +474,83 @@ def user_profile_page():
             avatar_filename = filename
 
         if avatar_filename:
-            cur.execute("UPDATE user SET fullname=?, category=?, avatar=? WHERE id=?",
-                        (fullname, category, avatar_filename, user_id))
+            cur.execute(
+                "UPDATE user SET fullname=?, category=?, avatar=? WHERE id=?",
+                (fullname, category, avatar_filename, user_id)
+            )
         else:
-            cur.execute("UPDATE user SET fullname=?, category=? WHERE id=?",
-                        (fullname, category, user_id))
+            cur.execute(
+                "UPDATE user SET fullname=?, category=? WHERE id=?",
+                (fullname, category, user_id)
+            )
+
         conn.commit()
         session["fullname"] = fullname
 
+    # -------- USER DATA --------
     cur.execute("SELECT * FROM user WHERE id=?", (user_id,))
     user = cur.fetchone()
+
+     # ---------------- INVESTMENTS ----------------
+    cur.execute("""
+        SELECT 
+            IFNULL(SUM(amount),0) AS total_amount,
+            IFNULL(SUM(current_value),0) AS total_current
+        FROM investments
+        WHERE user_id=?
+    """, (user_id,))
+    inv = cur.fetchone()
+
+    investment_amount = inv["total_amount"]
+    investment_value  = inv["total_current"]
+
+    # ---------------- STOCKS ----------------
+    #cur.execute("""
+    #    SELECT 
+    #        IFNULL(SUM(invested),0) AS stock_invested,
+    #        IFNULL(SUM(quantity * current_price),0) AS stock_value
+    #    FROM stocks
+    #    WHERE user_id=?
+    #""", (user_id,))
+    #stk = cur.fetchone()
+
+    #stock_invested = stk["stock_invested"]
+    #stock_value    = stk["stock_value"]
+    
+    # ---------------- STOCKS ----------------
+    cur.execute("""
+        SELECT symbol, quantity, buy_price
+        FROM stocks
+        WHERE user_id=?
+    """, (user_id,))
+    rows = cur.fetchall()
+
+    stock_invested = 0
+    stock_value = 0
+
+    for r in rows:
+        invested = r["quantity"] * r["buy_price"]
+        live_price = get_live_price(r["symbol"])
+        current_val = r["quantity"] * live_price
+
+        stock_invested += invested
+        stock_value += current_val
+
+
+    # ---------------- TOTALS ----------------
+    total_investments = investment_amount + stock_invested
+    portfolio_value   = investment_value + stock_value
+    total_returns     = portfolio_value - total_investments
+
     conn.close()
 
-    return render_template("user_profile.html", user=user)
+    return render_template(
+        "user_profile.html",
+        user=user,
+        total_investments=f"{total_investments:,.2f}",
+        portfolio_value=f"{portfolio_value:,.2f}",
+        total_returns=f"{total_returns:,.2f}"
+    )
 
 # ---------------------- SIGNUP ----------------------
 @app.post("/signup")
@@ -541,11 +714,233 @@ def investment_tips(user_id):
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('login'))
 
 
+@app.route('/add-stock-page')
+def add_stock_page():
+    if "user_id" not in session:
+        return redirect(url_for("login_page_get"))
+    return render_template("add_stock.html")
 
 
+@app.route("/add-stock", methods=["POST"])
+def add_stock():
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "Login required"}), 401
+
+    user_id = session["user_id"]
+    symbol = request.form.get("symbol")
+    quantity = request.form.get("quantity")
+    buy_price = request.form.get("buy_price")
+
+    # Validate input
+    if not symbol or not quantity or not buy_price:
+        return jsonify({"success": False, "message": "All fields are required"}), 400
+
+    try:
+        conn = get_db()
+        conn.execute("""
+            INSERT INTO stocks (user_id, symbol, quantity, buy_price)
+            VALUES (?, ?, ?, ?)
+        """, (user_id, symbol.upper(), float(quantity), float(buy_price)))
+        conn.commit()
+        conn.close()
+        return jsonify({"success": True, "message": "Stock added successfully!"})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route("/get_stock_reports", methods=["GET"])
+def get_stock_reports():
+    if "user_id" not in session:
+        return jsonify({"success": False}), 401
+
+    user_id = session["user_id"]
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT symbol, quantity, buy_price
+        FROM stocks
+        WHERE user_id = ?
+    """, (user_id,))
+    rows = cur.fetchall()
+    conn.close()
+
+    stocks = []
+
+    for r in rows:
+        live_price = round(get_live_price(r["symbol"]), 3)
+        invested = r["buy_price"] * r["quantity"]
+        current = live_price * r["quantity"]
+
+        stocks.append({
+            "symbol": r["symbol"],
+            "buy_price": r["buy_price"],
+            "quantity": r["quantity"],
+            "live_price": live_price,
+            "invested": round(invested, 2),
+            "current": round(current, 2),
+            "profit": round(current - invested, 2)
+        })
+
+    return jsonify({"success": True, "stocks": stocks})
+
+@app.route("/api/get_suggestions/<int:user_id>")
+def get_suggestions(user_id):
+    conn = sqlite3.connect("monthvest.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT investment_type, amount
+        FROM investments
+        WHERE user_id = ?
+    """, (user_id,))
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    if not rows:
+        return jsonify({
+            "risk": "Low",
+            "tips": ["Start investing to get personalized suggestions."],
+            "risk_percentages": {"Low": 100, "Medium": 0, "High": 0}
+        })
+
+    risk_map = {
+        "FD": "Low",
+        "Bond": "Low",
+        "Mutual Fund": "Medium",
+        "ETF": "Medium",
+        "Stock": "High",
+        "Crypto": "High"
+    }
+
+    risk_totals = {"Low": 0, "Medium": 0, "High": 0}
+    total_amount = 0
+
+    for inv_type, amount in rows:
+        risk = risk_map.get(inv_type, "Medium")
+        risk_totals[risk] += amount
+        total_amount += amount
+
+    risk_percentages = {
+        k: round((v / total_amount) * 100, 2)
+        for k, v in risk_totals.items()
+    }
+
+    if risk_percentages["High"] > 50:
+        overall_risk = "High"
+    elif risk_percentages["Medium"] + risk_percentages["High"] > 50:
+        overall_risk = "Medium"
+    else:
+        overall_risk = "Low"
+
+    tips = {
+        "High": [
+            "Your portfolio has high volatility.",
+            "Reduce exposure to risky stocks or crypto.",
+            "Add fixed-income instruments.",
+            "Avoid emotional trading."
+        ],
+        "Medium": [
+            "Your portfolio is moderately balanced.",
+            "Consider index funds for stability.",
+            "Review portfolio every 6 months."
+        ],
+        "Low": [
+            "Your portfolio is stable.",
+            "You may add equities for higher growth.",
+            "Ensure inflation-adjusted returns."
+        ]
+    }
+
+    return jsonify({
+        "risk": overall_risk,
+        "tips": tips[overall_risk],
+        "risk_percentages": risk_percentages
+    })
+
+@app.route("/api/portfolio/<int:user_id>")
+def api_portfolio(user_id):
+    conn = get_db()
+    cur = conn.cursor()
+
+    data = []
+
+    # -------- NORMAL INVESTMENTS --------
+    cur.execute("""
+        SELECT investment_type, amount, current_value
+        FROM investments
+        WHERE user_id = ?
+    """, (user_id,))
+    investments = cur.fetchall()
+
+    for i in investments:
+        data.append({
+            "type": i["investment_type"],
+            "amount": float(i["amount"]),
+            "currentValue": float(i["current_value"]),
+            "profit": float(i["current_value"] - i["amount"])
+        })
+
+    # -------- STOCKS --------
+    cur.execute("""
+        SELECT symbol, quantity, buy_price
+        FROM stocks
+        WHERE user_id = ?
+    """, (user_id,))
+    stocks = cur.fetchall()
+
+    for s in stocks:
+        live_price = get_live_price(s["symbol"])
+        invested = s["quantity"] * s["buy_price"]
+        current = s["quantity"] * live_price
+
+        data.append({
+            "type": f"Stock - {s['symbol']}",
+            "amount": round(invested, 2),
+            "currentValue": round(current, 2),
+            "profit": round(current - invested, 2)
+        })
+
+    conn.close()
+    return jsonify(data)
+
+@app.route("/api/total-investment")
+def total_investment():
+    if "user_id" not in session:
+        return jsonify(success=False)
+
+    user_id = session["user_id"]
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Other investments
+    cursor.execute("""
+        SELECT COALESCE(SUM(amount), 0)
+        FROM investments
+        WHERE user_id = ?
+    """, (user_id,))
+    other_total = cursor.fetchone()[0]
+
+    # Stock investments (safe)
+    try:
+        cursor.execute("""
+            SELECT COALESCE(SUM(buy_price * quantity), 0)
+            FROM stocks
+            WHERE user_id = ?
+        """, (user_id,))
+        stock_total = cursor.fetchone()[0]
+    except sqlite3.OperationalError:
+        stock_total = 0   # table missing fallback
+
+    conn.close()
+
+    return jsonify(
+        success=True,
+        totalInvestment=round(other_total + stock_total, 2)
+    )
 
 
 # ---------------------- RUN SERVER ----------------------

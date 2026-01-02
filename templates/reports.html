@@ -5,188 +5,189 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MonthVest - Reports</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
-    body { font-family: Arial, sans-serif; margin: 0; background-color: #f5f6fa; display: flex; }
+body { font-family: Arial, sans-serif; margin: 0; background-color: #f5f6fa; }
 
-    /* Sidebar */
-    .sidebar {
-        width: 220px; background-color: #6a11cb; color: #fff; display: flex; flex-direction: column; padding: 30px 20px; height: 100vh; position: fixed;
-    }
-    .sidebar a { color: #fff; text-decoration: none; margin-bottom: 20px; font-size: 1.1rem; transition: 0.2s; padding: 10px; border-radius: 6px; display: flex; align-items: center; }
-    .sidebar a:hover { background-color: #7b33d6; }
-    .sidebar a i { margin-right: 10px; }
+.sidebar {
+    width: 220px;
+    background-color: #6a11cb;
+    color: #fff;
+    padding: 30px 20px;
+    height: 100vh;
+    position: fixed;
+}
+.sidebar a {
+    color: #fff;
+    text-decoration: none;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    padding: 10px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+}
+.sidebar a:hover { background-color: #7b33d6; }
+.sidebar i { margin-right: 10px; }
 
-    /* Main content */
-    .main-content { margin-left: 240px; padding: 30px; width: calc(100% - 240px); }
-    h2 { margin-bottom: 20px; }
+.main-content {
+    margin-left: 240px;
+    padding: 30px;
+}
 
-    button {
-        background-color: #6a11cb; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-right: 10px; margin-bottom: 20px;
-    }
-    button:hover { background-color: #7b33d6; }
+button {
+    background-color: #6a11cb;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: 10px;
+}
 
-    table {
-        width: 100%; border-collapse: collapse; background-color: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 30px;
-    }
-    th, td { padding: 12px 15px; text-align: left; }
-    th { background-color: #6a11cb; color: #fff; }
-    tr:nth-child(even) { background-color: #f2f2f2; }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+th, td { padding: 12px; }
+th { background: #6a11cb; color: #fff; }
+tr:nth-child(even) { background: #f2f2f2; }
 
+.profit { color: green; font-weight: bold; }
+.loss { color: red; font-weight: bold; }
 </style>
 </head>
+
 <body>
-    {% include "_navbar.html" %}
+{% include "_navbar.html" %}
 
-
-<!-- Sidebar -->
 <div class="sidebar">
-    <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-    <a href="add_investment.html"><i class="fas fa-plus-circle"></i> Add Investment</a>
-    <a href="edit_delete.html"><i class="fas fa-edit"></i> Edit / Delete</a>
-    <a href="portfolio_trends.html"><i class="fas fa-chart-line"></i> Portfolio Trends</a>
-    <a href="investment_tips.html"><i class="fas fa-lightbulb"></i> Investment Tips</a>
-    <a href="reports.html"><i class="fas fa-file-alt"></i> Reports</a>
-    <a href="user_profile.html"><i class="fas fa-user-circle"></i> User Profile</a>
+    <a href="{{ url_for('dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="{{ url_for('add_investment_page') }}"><i class="fas fa-plus"></i> Add Investment</a>
+    <a href="{{ url_for('add_stock_page') }}"><i class="fas fa-chart-line"></i> Add Stock</a>
+    <a href="{{ url_for('portfolio_trends_page') }}"><i class="fas fa-chart-line"></i> Portfolio Trends</a>
+    <a href="{{ url_for('investment_tips_page') }}"><i class="fas fa-lightbulb"></i> Investment Tips</a>
+    <a href="{{ url_for('reports_page') }}"><i class="fas fa-file-alt"></i> Reports</a>
+    <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
 </div>
 
-<!-- Main Content -->
 <div class="main-content">
-    <h2>Financial Reports</h2>
+<h2>Financial Reports</h2>
 
-    <button onclick="downloadCSV()">Download CSV</button>
-    <button onclick="downloadPDF()">Download PDF</button>
+<button onclick="downloadCSV()">Download CSV</button>
+<button onclick="downloadPDF()">Download PDF</button>
 
-    <h3>Total Investments</h3>
-    <p id="totalInvested">₹0</p>
+<h3>Total Investment (Stocks + Others)</h3>
+<p id="totalInvested">₹0</p>
 
-    <h3>Category Distribution</h3>
-    <table id="categoryTable">
-        <thead>
-            <tr><th>Category</th><th>Total Amount</th></tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+<h3>Category Distribution</h3>
+<table id="categoryTable">
+<thead><tr><th>Category</th><th>Total Amount</th></tr></thead>
+<tbody></tbody>
+</table>
 
-    <h3>Profit / Loss Summary</h3>
-    <table id="profitTable">
-        <thead>
-            <tr><th>Category</th><th>Profit / Loss (₹)</th></tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+<h3>Profit / Loss Summary</h3>
+<table id="profitTable">
+<thead><tr><th>Category</th><th>Profit / Loss</th></tr></thead>
+<tbody></tbody>
+</table>
+
+<h3>Stock Report</h3>
+<table id="stockTable">
+<thead>
+<tr>
+<th>Stock</th><th>Buy</th><th>Qty</th><th>Live</th>
+<th>Invested</th><th>Current</th><th>P/L</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script>
-async function loadReports() {
-    let res = await fetch("/get_investments");
-    let data = await res.json();
+/* ---------- TOTAL INVESTMENT (Dashboard logic) ---------- */
+async function loadTotalInvestment() {
+    const res = await fetch("/api/total-investment", {
+        credentials: "same-origin"
+    });
+
+    const data = await res.json();
 
     if (!data.success) {
-        alert("Unable to load reports");
+        document.getElementById("totalInvested").innerText = "₹0";
         return;
     }
 
-    let investments = data.investments;
-    window.investments = investments;
-
-    // ---------- TOTAL ----------
-    let totalInvested = investments.reduce((acc, inv) => acc + Number(inv.amount), 0);
-    document.getElementById("totalInvested").innerText = `₹${totalInvested.toFixed(2)}`;
-
-    // ---------- CATEGORY ----------
-    let categoryMap = {};
-    investments.forEach(inv => {
-        categoryMap[inv.investment_type] = 
-            (categoryMap[inv.investment_type] || 0) + Number(inv.amount);
-    });
-
-    let tbody1 = document.querySelector("#categoryTable tbody");
-    tbody1.innerHTML = "";
-    for (let cat in categoryMap) {
-        tbody1.innerHTML += `
-            <tr>
-                <td>${cat}</td>
-                <td>₹${categoryMap[cat].toFixed(2)}</td>
-            </tr>`;
-    }
-
-    // ---------- PROFIT LOSS ----------
-    let profitMap = {};
-    investments.forEach(inv => {
-        let profit = Number(inv.current_value) - Number(inv.amount);
-        profitMap[inv.investment_type] = 
-            (profitMap[inv.investment_type] || 0) + profit;
-    });
-
-    let tbody2 = document.querySelector("#profitTable tbody");
-    tbody2.innerHTML = "";
-    for (let cat in profitMap) {
-        tbody2.innerHTML += `
-            <tr>
-                <td>${cat}</td>
-                <td>₹${profitMap[cat].toFixed(2)}</td>
-            </tr>`;
-    }
+    document.getElementById("totalInvested").innerText =
+        `₹${Number(data.totalInvestment).toFixed(2)}`;
 }
 
+
+
+
+/* ---------- OTHER INVESTMENTS ---------- */
+async function loadReports() {
+    const res = await fetch("/get_investments");
+    const data = await res.json();
+    if (!data.success) return;
+
+    window.investments = data.investments;
+
+    let categoryMap = {}, profitMap = {};
+
+    data.investments.forEach(i => {
+        categoryMap[i.investment_type] =
+            (categoryMap[i.investment_type] || 0) + Number(i.amount);
+
+        let profit = Number(i.current_value) - Number(i.amount);
+        profitMap[i.investment_type] =
+            (profitMap[i.investment_type] || 0) + profit;
+    });
+
+    let catBody = document.querySelector("#categoryTable tbody");
+    catBody.innerHTML = "";
+    for (let c in categoryMap)
+        catBody.innerHTML += `<tr><td>${c}</td><td>₹${categoryMap[c].toFixed(2)}</td></tr>`;
+
+    let profBody = document.querySelector("#profitTable tbody");
+    profBody.innerHTML = "";
+    for (let c in profitMap)
+        profBody.innerHTML += `<tr><td>${c}</td><td>₹${profitMap[c].toFixed(2)}</td></tr>`;
+}
+
+/* ---------- STOCKS ---------- */
+async function loadStockReport() {
+    const res = await fetch("/get_stock_reports");
+    const data = await res.json();
+    if (!data.success) return;
+
+    let tbody = document.querySelector("#stockTable tbody");
+    tbody.innerHTML = "";
+
+    data.stocks.forEach(s => {
+        let cls = s.profit >= 0 ? "profit" : "loss";
+        tbody.innerHTML += `
+        <tr>
+            <td>${s.symbol}</td>
+            <td>₹${s.buy_price}</td>
+            <td>${s.quantity}</td>
+            <td>₹${s.live_price}</td>
+            <td>₹${s.invested}</td>
+            <td>₹${s.current}</td>
+            <td class="${cls}">₹${s.profit}</td>
+        </tr>`;
+    });
+}
+
+/* ---------- INIT ---------- */
+loadTotalInvestment();
 loadReports();
-
-
-// ------------------------- DOWNLOAD CSV -------------------------
-function downloadCSV() {
-    let investments = window.investments;
-    if (!investments) return alert("Data not loaded yet");
-
-    let csv = "Category,Amount,Current Value,Profit/Loss\n";
-
-    investments.forEach(inv => {
-        let profit = inv.current_value - inv.amount;
-        csv += `${inv.investment_type},₹${inv.amount},₹${inv.current_value},₹${profit}\n`;
-    });
-
-    let blob = new Blob([csv], { type: "text/csv" });
-    let link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "investment_report.csv";
-    link.click();
-}
-
-
-// ------------------------- DOWNLOAD PDF -------------------------
-function downloadPDF() {
-    const { jsPDF } = window.jspdf;
-    let doc = new jsPDF();
-
-    doc.setFontSize(18);
-    doc.text("Investment Report", 20, 20);
-
-    let y = 35;
-    doc.setFontSize(12);
-
-    let investments = window.investments;
-    if (!investments) return alert("Data not loaded yet");
-
-    investments.forEach(inv => {
-        let profit = inv.current_value - inv.amount;
-
-        doc.text(
-            `${inv.investment_type} | Invested: ₹${inv.amount} | Current: ₹${inv.current_value} | P/L: ₹${profit}`,
-            20,
-            y
-        );
-
-        y += 10;
-
-        // Avoid overflow (add new page)
-        if (y > 270) {
-            doc.addPage();
-            y = 20;
-        }
-    });
-
-    doc.save("investment_report.pdf");
-}
+loadStockReport();
 </script>
 
 </body>

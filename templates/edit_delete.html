@@ -6,7 +6,7 @@
 <title>MonthVest - Edit/Delete Investments</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 <style>
-    body { font-family: Arial, sans-serif; margin: 0; background-color: #f5f6fa; display: flex; }
+    body { font-family: Arial, sans-serif; margin: 0; background-color: #f5f6fa;  }
     .sidebar { width: 220px; background-color: #6a11cb; color: #fff; padding: 30px 20px; height: 100vh; position: fixed; display:flex; flex-direction: column; }
     .sidebar a { color:#fff; text-decoration:none; margin-bottom:20px; padding:10px; border-radius:6px; display:flex; align-items:center; }
     .sidebar a i { margin-right:10px; }
@@ -27,15 +27,45 @@
     {% include "_navbar.html" %}
 
 
-<div class="sidebar">
-    <a href="{{ url_for('dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-    <a href="{{ url_for('add_investment_page') }}"><i class="fas fa-plus-circle"></i> Add Investment</a>
-    <a href="{{ url_for('edit_delete_page') }}"><i class="fas fa-edit"></i> Edit / Delete</a>
-    <a href="{{ url_for('portfolio_trends_page') }}"><i class="fas fa-chart-line"></i> Portfolio Trends</a>
-    <a href="{{ url_for('investment_tips_page') }}"><i class="fas fa-lightbulb"></i> Investment Tips</a>
-    <a href="{{ url_for('reports_page') }}"><i class="fas fa-file-alt"></i> Reports</a>
-    <a href="{{ url_for('user_profile_page') }}"><i class="fas fa-user-circle"></i> User Profile</a>
-</div>
+ <!-- SIDEBAR -->
+    <div class="sidebar">
+        <a href="{{ url_for('dashboard') }}">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+
+        <a href="{{ url_for('add_investment_page') }}" class="active">
+            <i class="fas fa-plus"></i> Add Investment
+        </a>
+
+        <a href="{{ url_for('add_stock_page') }}">
+            <i class="fas fa-chart-line"></i> Add Stock
+        </a>
+
+        <a href="{{ url_for('edit_delete_page') }}">
+            <i class="fas fa-edit"></i> Edit / Delete
+        </a>
+
+        <a href="{{ url_for('portfolio_trends_page') }}">
+            <i class="fas fa-chart-line"></i> Portfolio Trends
+        </a>
+
+        <a href="{{ url_for('investment_tips_page') }}">
+            <i class="fas fa-lightbulb"></i> Investment Tips
+        </a>
+
+        <a href="{{ url_for('reports_page') }}">
+            <i class="fas fa-file-alt"></i> Reports
+        </a>
+
+        <a href="{{ url_for('user_profile_page') }}">
+            <i class="fas fa-user"></i> User Profile
+        </a>
+
+        <a href="{{ url_for('logout') }}" class="logout">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+
 
 <div class="main-content">
     <h2>Edit/Delete Investments</h2>
